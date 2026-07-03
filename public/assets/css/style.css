@@ -51,6 +51,7 @@
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
 body {
+  padding-top: var(--nav-h);  /* 为 fixed 导航栏留出占位高度 */
   font-family: var(--f-body);
   background-color: var(--paper);
   /* 纸张噪点纹理(内联 SVG,无需外部图片) */
@@ -229,8 +230,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 
 /* ---------- 8. 顶部导航 ---------- */
 .nav {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 80;
   height: var(--nav-h);
   background: rgba(247, 243, 234, .92);
@@ -582,6 +585,47 @@ body.menu-open .nav-drawer { display: block; animation: drawerin .35s var(--ease
 }
 
 /* 减弱动态偏好 */
+/* ---------- 回到顶部悬浮按钮 ---------- */
+.back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 26px;
+  z-index: 90;
+  width: 48px; height: 48px;
+  border: 2.5px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper-2);
+  box-shadow: 4px 4px 0 var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(16px) rotate(var(--tilt, -2deg));
+  pointer-events: none;
+  transition: opacity .3s ease, transform .35s var(--ease-pop), box-shadow .2s ease, background .2s ease;
+  user-select: none;
+  font-family: var(--f-display);
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1;
+}
+.back-to-top.show {
+  opacity: 1;
+  transform: translateY(0) rotate(-2deg);
+  pointer-events: auto;
+}
+.back-to-top:hover {
+  background: var(--tape);
+  transform: translateY(-4px) rotate(-3.5deg);
+  box-shadow: 6px 7px 0 var(--ink);
+}
+.back-to-top:active {
+  transform: translateY(2px) rotate(-1deg);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .001s !important;
