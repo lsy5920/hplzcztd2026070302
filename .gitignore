@@ -11,3 +11,9 @@ desktop.ini
 # ===== 编辑器配置 =====
 .vscode/
 .idea/
+
+# ===== Cloudflare 本地开发配置 =====
+# wrangler.toml 只用于本地 wrangler dev 调试,不上传 GitHub
+# 原因:若 toml 中含 pages_build_output_dir,Cloudflare 会禁用控制台绑定 UI
+# 生产 D1 绑定通过 Cloudflare Pages 控制台 → 设置 → 绑定 添加
+wrangler.toml

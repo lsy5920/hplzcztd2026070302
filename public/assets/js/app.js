@@ -303,12 +303,64 @@
     }
   };
 
-  /* ---------- 12. 启动 ---------- */
+  /* ---------- 12. 一键回顶部悬浮按钮 ---------- */
+  function initBackToTop() {
+    const btn = document.createElement("button");
+    btn.className = "back-to-top";
+    btn.setAttribute("aria-label", "回到顶部");
+    btn.setAttribute("title", "回到顶部");
+    btn.textContent = "↑";
+    document.body.appendChild(btn);
+
+    // 滚动超过一屏时显示
+    let ticking = false;
+    function onScroll() {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(function () {
+          btn.classList.toggle("show", window.scrollY > window.innerHeight * 0.6);
+          ticking = false;
+        });
+      }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    btn.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  /* ---------- 13. 全站阅读进度条 ---------- */
+  function initProgressBar() {
+    // 若页面已有自己的进度条(手册页)则跳过
+    if (document.getElementById("progress-film")) return;
+    const bar = document.createElement("div");
+    bar.className = "progress-film";
+    bar.setAttribute("aria-hidden", "true");
+    document.body.appendChild(bar);
+
+    let ticking = false;
+    function update() {
+      const doc = document.documentElement;
+      const total = doc.scrollHeight - window.innerHeight;
+      bar.style.width = (total > 0 ? Math.min(1, window.scrollY / total) * 100 : 0).toFixed(2) + "%";
+      ticking = false;
+    }
+    window.addEventListener("scroll", function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+  }
+
+  /* ---------- 14. 启动 ---------- */
   document.addEventListener("DOMContentLoaded", function () {
     renderNav();
     renderFooter();
     initReveal();
     initCountUp();
     initMarquee();
+    initBackToTop();
+    initProgressBar();
   });
 })();
