@@ -70,7 +70,9 @@ export async function onRequestPost({ request, env }) {
       }
     );
   } catch (err) {
-    if (isNoTableError(err)) return fail(TABLE_MISSING_MSG, 503);
-    return fail("注册失败:" + (err.message || "服务器开小差了"), 500);
+    // 临时调试:把原始错误信息也返回,方便定位缺失的表
+    const raw = err && err.message ? err.message : String(err);
+    if (isNoTableError(err)) return fail("表缺失[" + raw + "] — " + TABLE_MISSING_MSG, 503);
+    return fail("注册失败:" + raw, 500);
   }
 }
