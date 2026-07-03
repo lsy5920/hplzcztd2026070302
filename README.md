@@ -296,3 +296,23 @@ npx wrangler d1 execute hplz-db --local --file=./schema.sql
   - D1 绑定改为完全通过 Cloudflare 控制台 Settings → Functions → D1 database bindings 设置
   - 本地调试方式不变,可自行取消注释填入真实 database_id
 ```
+
+```
+2026-07-04 02:00 【优化】顶栏始终悬浮在页面顶部
+  - .nav 改为 position:fixed,body 增加 padding-top 等量留空
+  - 避免内容被导航栏遮挡
+
+2026-07-04 02:00 【优化】开屏场记板动画改为每次刷新都播放
+  - 移除 home.js 中的 sessionStorage 判断逻辑
+  - 仍支持点击任意处跳过
+
+2026-07-04 02:00 【新增】全站一键回顶部悬浮按钮
+  - 滚动超过一屏后出现,点击平滑回顶
+  - 胶带涂鸦风格:带黄色 hover 效果和手工阴影
+  - 在 app.js 统一初始化,所有页面均生效
+
+2026-07-04 02:00 【修复】D1 数据库无法通过控制台绑定的问题
+  - 根本原因:wrangler.toml 含 pages_build_output_dir 会禁用控制台绑定 UI
+  - 修复方案:将 wrangler.toml 加入 .gitignore,不再上传 GitHub
+  - 操作步骤:见下方「重新部署步骤」
+```
