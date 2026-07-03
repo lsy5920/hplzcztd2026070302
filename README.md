@@ -288,3 +288,11 @@ npx wrangler d1 execute hplz-db --local --file=./schema.sql
   - 移动端全面适配(320px 起)
   - 五个在线创作工具:20 分评分器/灵感卡/拍摄清单/粗剪反馈/复盘六问
 ```
+
+```
+2026-07-04 01:00 【修复】移除 wrangler.toml 中的 [[d1_databases]] 节
+  - 原因:占位文字 database_id 导致 Cloudflare Pages 部署报 Error 8000022
+  - 影响范围:生产部署,推代码后重新部署即可恢复
+  - D1 绑定改为完全通过 Cloudflare 控制台 Settings → Functions → D1 database bindings 设置
+  - 本地调试方式不变,可自行取消注释填入真实 database_id
+```
