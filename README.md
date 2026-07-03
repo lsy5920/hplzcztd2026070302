@@ -123,3 +123,168 @@ git push -u origin main
 > 如果注册时提示数据库相关错误,请检查第 3-4 步是否完成。
 
 ---
+
+## 四、使用教程
+
+### 4.1 访客(所有人可用)
+
+| 功能 | 路径 | 说明 |
+|------|------|------|
+| 浏览团队介绍 | 首页 `index.html` | 含开机场记板动画、成员介绍、内容支柱 |
+| 查看系列 + 抽脑洞 | `works.html` | 24 个选题随机抽签机 |
+| 阅读团队手册 | `manual.html` | 全文 15 章 + 8 附录，带侧边目录和阅读进度条 |
+| 使用创作工具 | `tools.html` | 选题评分器、灵感卡（文本）、拍摄清单、粗剪反馈、复盘六问 |
+| 申请加入 | `join.html` | 填写角色卡提交申请 |
+| 注册账号 | `login.html` | 第一个注册的用户自动成为主理人 |
+
+### 4.2 登录用户（访客角色）
+
+- 可投灵感卡进团队灵感池（`tools.html` → 灵感卡 → 投进团队灵感池）
+- 可快速投一句话灵感（成员空间顶部输入框）
+- 可查看灵感池看板（只读，不能流转）
+
+### 4.3 团队成员（member 角色）
+
+- 可在看板上移动灵感卡（灵感池 → 待评估 → 已入选 → 暂存）
+- 可删除自己提交的灵感卡
+
+> 主理人在成员空间「剧组花名册」里把访客提升为「团队成员」后生效。
+
+### 4.4 主理人（admin 角色，第一个注册用户）
+
+除以上所有权限外：
+
+- **申请审核**：成员空间查看所有入队申请，点「通过」或「婉拒」
+- **成员管理**：把注册用户提升为团队成员，或调回访客
+- **删除任意灵感卡**
+
+---
+
+## 五、项目目录结构
+
+```
+hplzcztd2026070302/          ← 仓库根目录(本文件夹整个上传 GitHub)
+│
+├── public/                  ← 网站静态文件，Cloudflare Pages 的输出目录
+│   ├── index.html           ← 首页(开机动画 + 宣传展示)
+│   ├── works.html           ← 系列企划 + 24 个选题 + 脑洞抽签机
+│   ├── manual.html          ← 团队手册全文在线版
+│   ├── tools.html           ← 创作工具间(五个工具)
+│   ├── join.html            ← 申请加入
+│   ├── login.html           ← 登录 / 注册
+│   ├── dashboard.html       ← 成员空间(需登录)
+│   └── assets/
+│       ├── css/
+│       │   └── style.css    ← 全站设计系统(片场胶带涂鸦风)
+│       ├── js/
+│       │   ├── app.js       ← 全站共享脚本(导航/页脚/接口/登录状态)
+│       │   ├── home.js      ← 首页专属脚本
+│       │   ├── works.js     ← 系列页 + 脑洞抽签机
+│       │   ├── manual.js    ← 手册侧边目录 + 阅读进度条
+│       │   ├── tools.js     ← 五个创作工具逻辑
+│       │   ├── join.js      ← 申请表单提交
+│       │   ├── login.js     ← 登录 / 注册表单
+│       │   └── dashboard.js ← 成员空间逻辑
+│       └── img/
+│           └── favicon.svg  ← 四格场记板图标
+│
+├── functions/               ← Cloudflare Pages Functions(后端接口)
+│   └── api/
+│       ├── _utils.js        ← 共享工具(响应/密码/会话/校验)
+│       ├── register.js      ← POST /api/register 注册
+│       ├── login.js         ← POST /api/login 登录
+│       ├── logout.js        ← POST /api/logout 退出
+│       ├── me.js            ← GET  /api/me 查询当前用户
+│       ├── apply.js         ← POST /api/apply 提交入队申请
+│       ├── applications.js  ← GET  /api/applications 申请列表(admin)
+│       ├── applications/
+│       │   └── review.js    ← POST /api/applications/review 审核
+│       ├── ideas.js         ← GET/POST /api/ideas 灵感卡
+│       ├── ideas/
+│       │   └── [id].js      ← PATCH/DELETE /api/ideas/:id 单卡操作
+│       ├── members.js       ← GET  /api/members 成员列表
+│       └── members/
+│           └── role.js      ← POST /api/members/role 调整角色
+│
+├── schema.sql               ← D1 数据库建表语句(第 3 步执行)
+├── wrangler.toml            ← Cloudflare 本地开发配置
+├── .gitignore               ← 排除 node_modules 等不需上传的文件
+└── README.md                ← 本文档
+```
+
+---
+
+## 六、常见问题排查
+
+**Q：注册时提示「数据库尚未配置」或「DB」相关错误**
+
+A：说明 D1 数据库还没绑定。按部署教程第 3-4 步操作，在 Cloudflare Pages 的「Settings → Functions → D1 database bindings」添加绑定，变量名填 `DB`，然后重新部署一次。
+
+---
+
+**Q：注册提示「数据库表尚未初始化」**
+
+A：数据库已绑定但还没建表。回到 Cloudflare D1 控制台，找到 `hplz-db`，在「Console」标签页粘贴并执行 `schema.sql` 全部内容。
+
+---
+
+**Q：注册/登录成功但刷新后又变成未登录**
+
+A：Cookie 设置了 `Secure` 标志，必须在 HTTPS 下才有效。直接在 `https://xxx.pages.dev` 上访问即可，不要用 `http://`。本地用 `wrangler pages dev` 调试时 Cookie 也正常生效。
+
+---
+
+**Q：手册页侧边目录不显示**
+
+A：目录由 `manual.js` 从页面 `section[data-toc]` 元素自动收集生成，需要 JavaScript 运行完成后才出现，加载完毕后刷新即可看到。
+
+---
+
+**Q：灵感卡投进去了，但看板上没出现**
+
+A：看板会在页面加载时请求一次数据，投完后需要手动刷新页面（或后续版本可加实时刷新）。
+
+---
+
+**Q：GitHub push 时提示需要 Personal Access Token**
+
+A：在 GitHub → 右上角头像 → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token，勾选 `repo` 权限，生成后复制备用。Push 时密码栏粘贴这个 token 即可。
+
+---
+
+**Q：本地想用 wrangler 调试，命令是什么**
+
+A：先安装 wrangler（只需一次）：
+
+```cmd
+npm install -g wrangler@3
+```
+
+然后在项目根目录运行：
+
+```cmd
+npx wrangler pages dev public --d1 DB
+```
+
+首次运行会自动创建本地 SQLite 数据库。再另开一个命令行窗口，执行建表语句：
+
+```cmd
+npx wrangler d1 execute hplz-db --local --file=./schema.sql
+```
+
+浏览器打开 `http://localhost:8788` 即可本地完整测试。
+
+---
+
+## 七、更新日志
+
+```
+2026-07-04 00:00 【初次发布】完成胡拍乱造创作组团队官网全量开发
+  - 7 个 HTML 页面:首页/系列/手册/工具间/申请加入/登录注册/成员空间
+  - Cloudflare Pages Functions 后端:注册/登录/退出/申请/审核/成员管理/灵感卡
+  - Cloudflare D1 真实数据库:users/sessions/applications/ideas 四张表
+  - PBKDF2-SHA256 密码哈希 + HttpOnly Cookie 会话
+  - 「片场胶带涂鸦风」全站设计系统:胶带纸片卡/图章/场记板/警戒纹/花字
+  - 移动端全面适配(320px 起)
+  - 五个在线创作工具:20 分评分器/灵感卡/拍摄清单/粗剪反馈/复盘六问
+```
