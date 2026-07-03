@@ -14,4 +14,4 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "hplz-db"
-database_id = "请替换成你的D1数据库UUID"
+database_id = "a77a3682-ae6e-4de8-97e7-c2cd3e971c93"
