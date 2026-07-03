@@ -305,50 +305,45 @@
 
   /* ---------- 12. 一键回顶部悬浮按钮 ---------- */
   function initBackToTop() {
-    const btn = document.createElement("button");
-    btn.className = "back-to-top";
-    btn.setAttribute("aria-label", "回到顶部");
-    btn.setAttribute("title", "回到顶部");
-    btn.textContent = "↑";
+    var btn = document.createElement('button');
+    btn.className = 'back-to-top';
+    btn.setAttribute('aria-label', '回到顶部');
+    btn.setAttribute('title', '回到顶部');
+    btn.innerHTML = '&#8593;';
     document.body.appendChild(btn);
-
-    // 滚动超过一屏时显示
-    let ticking = false;
+    var ticking = false;
     function onScroll() {
       if (!ticking) {
         ticking = true;
         requestAnimationFrame(function () {
-          btn.classList.toggle("show", window.scrollY > window.innerHeight * 0.6);
+          btn.classList.toggle('show', window.scrollY > window.innerHeight * 0.6);
           ticking = false;
         });
       }
     }
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
-
-    btn.addEventListener("click", function () {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    btn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 
   /* ---------- 13. 全站阅读进度条 ---------- */
   function initProgressBar() {
-    // 若页面已有自己的进度条(手册页)则跳过
-    if (document.getElementById("progress-film")) return;
-    const bar = document.createElement("div");
-    bar.className = "progress-film";
-    bar.setAttribute("aria-hidden", "true");
+    if (document.getElementById('progress-film')) return;
+    var bar = document.createElement('div');
+    bar.className = 'progress-film';
+    bar.setAttribute('aria-hidden', 'true');
     document.body.appendChild(bar);
-
-    let ticking = false;
+    var ticking2 = false;
     function update() {
-      const doc = document.documentElement;
-      const total = doc.scrollHeight - window.innerHeight;
-      bar.style.width = (total > 0 ? Math.min(1, window.scrollY / total) * 100 : 0).toFixed(2) + "%";
-      ticking = false;
+      var doc = document.documentElement;
+      var total = doc.scrollHeight - window.innerHeight;
+      bar.style.width = (total > 0 ? Math.min(1, window.scrollY / total) * 100 : 0).toFixed(2) + '%';
+      ticking2 = false;
     }
-    window.addEventListener("scroll", function () {
-      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    window.addEventListener('scroll', function () {
+      if (!ticking2) { ticking2 = true; requestAnimationFrame(update); }
     }, { passive: true });
     update();
   }
