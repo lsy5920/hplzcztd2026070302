@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>创作工具间 · 胡拍乱造创作组</title>
+  <meta name="description" content="胡拍乱造团队创作工具间:20 分制选题评分器、灵感卡生成器、周日拍摄清单、粗剪反馈生成器、每周复盘六问,手册模板全部在线化。">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <div id="site-nav"></div>
+
+  <main>
+    <header class="page-hero container">
+      <span class="scene-tag">SCENE 04 · 创作工具间</span>
+      <h1 class="huazi stroke-white">手册模板,<span class="rd">全部通电</span></h1>
+      <p class="hand">—— 选题评分、灵感卡、拍摄清单、粗剪反馈、每周复盘,填完即用,不用翻 PDF。</p>
+    </header>
+
+    <div class="container">
+      <!-- ===== 工具切换标签 ===== -->
+      <div class="tool-tabs" role="tablist" aria-label="创作工具切换">
+        <button class="on" data-tool="score" role="tab" aria-selected="true">① 选题评分器</button>
+        <button data-tool="idea" role="tab" aria-selected="false">② 灵感卡</button>
+        <button data-tool="checklist" role="tab" aria-selected="false">③ 周日拍摄清单</button>
+        <button data-tool="feedback" role="tab" aria-selected="false">④ 粗剪反馈</button>
+        <button data-tool="review" role="tab" aria-selected="false">⑤ 每周复盘</button>
+      </div>
+
+      <!-- ============ 工具① 20 分制选题评分器 ============ -->
+      <section class="tool-panel on" id="tool-score" role="tabpanel">
+        <div class="score-grid">
+          <div class="tape-card no-tape">
+            <h2 class="huazi" style="font-size:24px;margin-bottom:6px;">20 分制选题评分</h2>
+            <p class="hand" style="margin-bottom:24px;">手册 3.4:五个维度各 0-4 分,拖动滑块,图章自动落下。</p>
+
+            <div class="slider-row">
+              <div class="top"><b>一眼能懂</b><span class="val" data-val="s1">2</span></div>
+              <input type="range" id="s1" min="0" max="4" value="2" step="1" aria-label="一眼能懂评分">
+              <p class="desc" data-desc="s1">基本理解</p>
+            </div>
+            <div class="slider-row">
+              <div class="top"><b>共鸣 / 情绪</b><span class="val" data-val="s2">2</span></div>
+              <input type="range" id="s2" min="0" max="4" value="2" step="1" aria-label="共鸣情绪评分">
+              <p class="desc" data-desc="s2">部分人有感</p>
+            </div>
+            <div class="slider-row">
+              <div class="top"><b>笑点 / 反转</b><span class="val" data-val="s3">2</span></div>
+              <input type="range" id="s3" min="0" max="4" value="2" step="1" aria-label="笑点反转评分">
+              <p class="desc" data-desc="s3">可预期</p>
+            </div>
+            <div class="slider-row">
+              <div class="top"><b>可拍性</b><span class="val" data-val="s4">2</span></div>
+              <input type="range" id="s4" min="0" max="4" value="2" step="1" aria-label="可拍性评分">
+              <p class="desc" data-desc="s4">需较多准备</p>
+            </div>
+            <div class="slider-row">
+              <div class="top"><b>系列潜力</b><span class="val" data-val="s5">2</span></div>
+              <input type="range" id="s5" min="0" max="4" value="2" step="1" aria-label="系列潜力评分">
+              <p class="desc" data-desc="s5">可做 2 条</p>
+            </div>
+          </div>
+
+          <div class="tape-card score-result tilt-r">
+            <p class="mono" style="font-size:12px;letter-spacing:.2em;color:var(--ink-faint);">TOTAL SCORE</p>
+            <div class="score-total"><span id="score-total">10</span><small> / 20</small></div>
+            <div class="score-verdict" id="score-verdict" aria-live="polite"></div>
+            <p class="score-note" id="score-note">拖动左侧滑块开始评分</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 工具② 灵感卡生成器 ============ -->
+      <section class="tool-panel" id="tool-idea" role="tabpanel">
+        <div class="score-grid">
+          <div class="tape-card no-tape">
+            <h2 class="huazi" style="font-size:24px;margin-bottom:6px;">灵感卡生成器</h2>
+            <p class="hand" style="margin-bottom:24px;">手册附录 B:把一闪而过的念头,变成 30 秒讲得明白的卡片。</p>
+
+            <div class="field">
+              <label for="idea-title">一句话设定 <span class="tip">如果______,会发生什么?</span></label>
+              <input type="text" id="idea-title" maxlength="80" placeholder="如果尴尬能像游戏一样扣血……">
+            </div>
+            <div class="field">
+              <label for="idea-obs">生活观察 <span class="tip">来自哪个真实尴尬、情绪或冲突?</span></label>
+              <input type="text" id="idea-obs" maxlength="200" placeholder="每次在电梯里遇到只见过一面的同事">
+            </div>
+            <div class="field">
+              <label for="idea-rule">荒诞规则 <span class="tip">观众一句话能理解的规则</span></label>
+              <input type="text" id="idea-rule" maxlength="200" placeholder="尴尬值满 100 就当场石化 3 秒">
+            </div>
+            <div class="field">
+              <label for="idea-esc">升级 1 / 升级 2 <span class="tip">麻烦如何越来越大?</span></label>
+              <textarea id="idea-esc" maxlength="300" placeholder="升级1:对方也开始扣血&#10;升级2:领导进电梯,全员血条见底"></textarea>
+            </div>
+            <div class="field">
+              <label for="idea-end">结尾 <span class="tip">反转、回扣、情绪或下一集钩子</span></label>
+              <input type="text" id="idea-end" maxlength="200" placeholder="两人同时石化,电梯门开,新同事看到两座雕像">
+            </div>
+            <div class="field">
+              <label for="idea-res">所需资源 <span class="tip">人物、场地、道具、服装、技术</span></label>
+              <input type="text" id="idea-res" maxlength="200" placeholder="2 人、电梯或楼道、血条后期特效">
+            </div>
+            <div class="field">
+              <label for="idea-risk">可拍性风险 <span class="tip">缺人、噪音、授权、天气等</span></label>
+              <input type="text" id="idea-risk" maxlength="200" placeholder="电梯拍摄需物业同意,备选楼道版">
+            </div>
+          </div>
+
+          <div>
+            <div class="tape-card tilt-r" style="margin-bottom:20px;">
+              <h3 style="font-weight:900;margin-bottom:10px;">卡片预览</h3>
+              <div class="gen-out" id="idea-preview">(左侧开始填写,这里实时预览)</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+                <button class="btn sm yellow" id="idea-copy">复制文本</button>
+                <button class="btn sm primary" id="idea-submit">投进团队灵感池</button>
+              </div>
+              <p class="hand" id="idea-login-tip" style="margin-top:10px;font-size:14px;">批注:投灵感池需要先<a href="login.html">登录</a>;复制文本随时可用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 工具③ 周日拍摄清单 ============ -->
+      <section class="tool-panel" id="tool-checklist" role="tabpanel">
+        <div class="score-grid">
+          <div>
+            <div class="tape-card no-tape" style="margin-bottom:8px;">
+              <h2 class="huazi" style="font-size:24px;margin-bottom:6px;">周日拍摄清单</h2>
+              <p class="hand">手册附录 E:出发前到离场后,五个阶段逐项打勾。勾选进度自动保存在本机,拍完一键清空。</p>
+            </div>
+            <div id="checklist-mount"><!-- 由 tools.js 渲染 --></div>
+          </div>
+
+          <div class="check-progress">
+            <div class="tape-card tilt-r" style="text-align:center;">
+              <p class="mono" style="font-size:12px;letter-spacing:.2em;color:var(--ink-faint);margin-bottom:10px;">SHOOTING READY</p>
+              <div class="ring-wrap" style="justify-content:center;">
+                <svg class="ring" width="110" height="110" viewBox="0 0 110 110" aria-hidden="true">
+                  <circle class="bg" cx="55" cy="55" r="46"></circle>
+                  <circle class="fg" id="ring-fg" cx="55" cy="55" r="46"></circle>
+                </svg>
+                <div>
+                  <div class="ring-num"><span id="check-done">0</span>/<span id="check-total">0</span></div>
+                  <p class="hand" style="font-size:14px;">项已确认</p>
+                </div>
+              </div>
+              <div class="score-verdict" id="check-verdict" style="min-height:56px;"></div>
+              <button class="btn sm ghost" id="check-reset">清空重来</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 工具④ 粗剪反馈生成器 ============ -->
+      <section class="tool-panel" id="tool-feedback" role="tabpanel">
+        <div class="score-grid">
+          <div class="tape-card no-tape">
+            <h2 class="huazi" style="font-size:24px;margin-bottom:6px;">粗剪反馈生成器</h2>
+            <p class="hand" style="margin-bottom:24px;">手册 6.1 + 附录 F:反馈必须带时间点;每人只提「必须改 1 条 + 可选改 1 条」。</p>
+
+            <div class="field">
+              <label for="fb-work">作品 / 版本</label>
+              <input type="text" id="fb-work" maxlength="60" placeholder="开会_粗剪A_20260713">
+            </div>
+            <div class="field">
+              <label for="fb-best">最有效的片段 <span class="tip">时间点 + 原因</span></label>
+              <input type="text" id="fb-best" maxlength="200" placeholder="00:12 反应镜头,B 的表情比台词好笑">
+            </div>
+            <div class="field">
+              <label for="fb-must">必须修改 1 条 <span class="tip">时间点 + 具体问题 + 建议</span></label>
+              <input type="text" id="fb-must" maxlength="200" placeholder="00:07 反应镜头太短,建议延长到 1.5 秒">
+            </div>
+            <div class="field">
+              <label for="fb-opt">可选修改 1 条 <span class="tip">时间点 + 建议</span></label>
+              <input type="text" id="fb-opt" maxlength="200" placeholder="00:31 音效可以换成更闷的一声">
+            </div>
+            <div class="field">
+              <label>是否达到发布门槛</label>
+              <div class="chip-group" id="fb-pass">
+                <label><input type="radio" name="fb-pass" value="是" checked><span>是,可以发布</span></label>
+                <label><input type="radio" name="fb-pass" value="否"><span>否,还差一点</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="fb-lesson">可沉淀经验 <span class="tip">写成一句可复用规则</span></label>
+              <input type="text" id="fb-lesson" maxlength="200" placeholder="笑点后至少留 1 秒反应镜头">
+            </div>
+          </div>
+
+          <div>
+            <div class="tape-card tilt-r">
+              <h3 style="font-weight:900;margin-bottom:10px;">反馈预览</h3>
+              <div class="gen-out" id="fb-preview">(左侧开始填写,这里实时预览)</div>
+              <div style="margin-top:14px;">
+                <button class="btn sm yellow" id="fb-copy">复制反馈,发到群里</button>
+              </div>
+              <p class="hand" style="margin-top:10px;font-size:14px;">批注:反馈集中一次提交,不零散追加——这是手册的规矩。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 工具⑤ 每周复盘六问 ============ -->
+      <section class="tool-panel" id="tool-review" role="tabpanel">
+        <div class="score-grid">
+          <div class="tape-card no-tape">
+            <h2 class="huazi" style="font-size:24px;margin-bottom:6px;">每周复盘六问</h2>
+            <p class="hand" style="margin-bottom:24px;">手册 10.5:复盘只回答这六个问题;禁止「这条没爆所以失败」。</p>
+
+            <div class="field">
+              <label for="rv1">① 本周最满意的一个具体片段?为什么?</label>
+              <textarea id="rv1" maxlength="300" placeholder="片段 + 原因"></textarea>
+            </div>
+            <div class="field">
+              <label for="rv2">② 哪一处观众最可能看不懂或划走?</label>
+              <textarea id="rv2" maxlength="300"></textarea>
+            </div>
+            <div class="field">
+              <label for="rv3">③ 哪项准备让周日拍摄更顺?</label>
+              <input type="text" id="rv3" maxlength="200">
+            </div>
+            <div class="field">
+              <label for="rv4">④ 哪项临时变化造成浪费?</label>
+              <input type="text" id="rv4" maxlength="200">
+            </div>
+            <div class="field">
+              <label for="rv5">⑤ 下周只保留一个实验点,是什么?</label>
+              <input type="text" id="rv5" maxlength="200" placeholder="只能写一个!">
+            </div>
+            <div class="field">
+              <label for="rv6">⑥ 哪条经验需要加入模板或清单?</label>
+              <input type="text" id="rv6" maxlength="200">
+            </div>
+            <div class="field">
+              <label>团队状态</label>
+              <div class="chip-group" id="rv-state">
+                <label><input type="radio" name="rv-state" value="继续" checked><span>继续 →</span></label>
+                <label><input type="radio" name="rv-state" value="降频"><span>降频一点</span></label>
+                <label><input type="radio" name="rv-state" value="调整"><span>需要调整</span></label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="tape-card tilt-r">
+              <h3 style="font-weight:900;margin-bottom:10px;">复盘记录预览</h3>
+              <div class="gen-out" id="rv-preview">(左侧开始填写,这里实时预览)</div>
+              <div style="margin-top:14px;">
+                <button class="btn sm yellow" id="rv-copy">复制记录,归档留痕</button>
+              </div>
+              <p class="hand" style="margin-top:10px;font-size:14px;">批注:复盘写完贴进团队文档——「作品留痕」也包括经验。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/tools.js"></script>
+</body>
+</html>

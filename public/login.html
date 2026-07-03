@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 / 注册 · 胡拍乱造创作组</title>
+  <meta name="description" content="登录或注册胡拍乱造创作组账号,解锁灵感池看板、云端灵感卡等团队协作功能。">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <div id="site-nav"></div>
+
+  <main>
+    <div class="auth-wrap container">
+      <div style="text-align:center;margin-bottom:26px;">
+        <span class="scene-tag">SCENE 06 · 片场门口</span>
+        <h1 class="huazi stroke-white" style="font-size:clamp(30px,5vw,42px);margin-top:16px;">签到,<span class="rd">进片场</span></h1>
+        <p class="hand" style="margin-top:6px;">—— 注册后可投灵感卡进团队灵感池;第一个注册的人自动成为主理人。</p>
+      </div>
+
+      <!-- 登录/注册标签 -->
+      <div class="auth-tabs" role="tablist">
+        <button class="on" id="tab-login" role="tab" aria-selected="true">登录</button>
+        <button id="tab-register" role="tab" aria-selected="false">注册新账号</button>
+      </div>
+
+      <!-- 登录面板 -->
+      <div class="auth-panel" id="panel-login" role="tabpanel">
+        <form id="login-form" novalidate>
+          <div class="field" id="lf-username">
+            <label for="l-username">账号</label>
+            <input type="text" id="l-username" autocomplete="username" maxlength="20" placeholder="3-20 位字母、数字或下划线">
+            <span class="err">请填写账号</span>
+          </div>
+          <div class="field" id="lf-password">
+            <label for="l-password">密码</label>
+            <input type="password" id="l-password" autocomplete="current-password" maxlength="64" placeholder="你的密码">
+            <span class="err">请填写密码</span>
+          </div>
+          <button type="submit" class="btn primary" id="login-btn" style="width:100%;margin-top:8px;">登录</button>
+          <p class="hand" style="margin-top:14px;font-size:14px;text-align:center;">还没有账号?点上方「注册新账号」,10 秒搞定。</p>
+        </form>
+      </div>
+
+      <!-- 注册面板 -->
+      <div class="auth-panel" id="panel-register" role="tabpanel" style="display:none;">
+        <form id="register-form" novalidate>
+          <div class="field" id="rf-username">
+            <label for="r-username">账号 <span class="tip">3-20 位字母、数字或下划线,登录用</span></label>
+            <input type="text" id="r-username" autocomplete="username" maxlength="20" placeholder="例:xiaoming_01">
+            <span class="err">账号需为 3-20 位字母、数字或下划线</span>
+          </div>
+          <div class="field" id="rf-display">
+            <label for="r-display">昵称 <span class="tip">片场里大家怎么叫你</span></label>
+            <input type="text" id="r-display" maxlength="20" placeholder="例:小明 / 阿造">
+            <span class="err">昵称不能为空</span>
+          </div>
+          <div class="field" id="rf-password">
+            <label for="r-password">密码 <span class="tip">至少 6 位,自己记牢</span></label>
+            <input type="password" id="r-password" autocomplete="new-password" maxlength="64" placeholder="至少 6 位">
+            <span class="err">密码长度需在 6-64 位之间</span>
+          </div>
+          <div class="field" id="rf-password2">
+            <label for="r-password2">再输一遍密码</label>
+            <input type="password" id="r-password2" autocomplete="new-password" maxlength="64" placeholder="两次要一致">
+            <span class="err">两次输入的密码不一致</span>
+          </div>
+          <button type="submit" class="btn primary" id="register-btn" style="width:100%;margin-top:8px;">注册并进入片场</button>
+          <p class="hand" style="margin-top:14px;font-size:14px;text-align:center;">注册即同意本站仅将账号用于团队协作功能。</p>
+        </form>
+      </div>
+
+      <!-- 角色说明 -->
+      <div class="pin-note" style="margin-top:30px;">
+        角色说明:第一个注册的账号自动成为<b>主理人</b>(可审核申请、管理成员);之后注册的是<b>访客</b>,主理人可把队友提升为<b>团队成员</b>,解锁灵感池看板。
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/login.js"></script>
+</body>
+</html>

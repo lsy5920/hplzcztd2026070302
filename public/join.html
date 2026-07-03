@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>申请加入 · 胡拍乱造创作组</title>
+  <meta name="description" content="申请加入胡拍乱造创作组:填一张在线成员角色卡,会表演、会写、会拍、会剪、会运营,或者只是特别想试试——都欢迎。">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <div id="site-nav"></div>
+
+  <main>
+    <header class="page-hero container">
+      <span class="scene-tag">SCENE 05 · 剧组招募</span>
+      <h1 class="huazi stroke-white">来,填一张<span class="rd">角色卡</span></h1>
+      <p class="hand">—— 手册附录 A 原版字段。主理人会亲自查看每一份申请,通过后主动联系你。</p>
+    </header>
+
+    <div class="container" style="max-width:880px;">
+      <!-- 招募须知 -->
+      <div class="tape-card rv" style="margin-bottom:34px;">
+        <h2 style="font-weight:900;font-size:20px;margin-bottom:12px;">进组须知</h2>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px 22px;font-size:14.5px;color:var(--ink-soft);" class="join-notes">
+          <p>🎬 <b>周日是拍摄日</b>,其余工作按天异步,不规定几点上线。</p>
+          <p>🧪 <b>兴趣与学习优先</b>,不以涨粉、收入作硬性考核。</p>
+          <p>🎭 <b>轮流做主角</b>:每人都能提创意、当主创、学新岗位。</p>
+          <p>📦 <b>完成优于完美</b>:先拍出可发布版本,再一起变强。</p>
+        </div>
+      </div>
+
+      <!-- 申请表单 -->
+      <form class="tape-card no-tape rv" id="join-form" novalidate>
+        <h2 style="font-weight:900;font-size:22px;margin-bottom:4px;">成员角色卡</h2>
+        <p class="hand" style="margin-bottom:26px;">带 * 的必填,其余随意——但写得越具体,越容易被记住。</p>
+
+        <div class="field" id="f-name">
+          <label for="j-name">你的称呼 / 代号 *</label>
+          <input type="text" id="j-name" maxlength="30" placeholder="怎么叫你都行,花名也可以" required>
+          <span class="err">称呼不能为空</span>
+        </div>
+
+        <div class="field" id="f-contact">
+          <label for="j-contact">联系方式 * <span class="tip">微信号 / 手机号 / 抖音号,通过后我们主动联系你</span></label>
+          <input type="text" id="j-contact" maxlength="60" placeholder="例:wx_xxxx 或 138xxxx0000" required>
+          <span class="err">联系方式至少 3 个字符</span>
+        </div>
+
+        <div class="field">
+          <label>你希望在团队获得什么 * <span class="tip">可多选</span></label>
+          <div class="chip-group" id="j-wish">
+            <label><input type="checkbox" value="表演"><span>表演</span></label>
+            <label><input type="checkbox" value="编剧"><span>编剧</span></label>
+            <label><input type="checkbox" value="拍摄"><span>拍摄</span></label>
+            <label><input type="checkbox" value="剪辑"><span>剪辑</span></label>
+            <label><input type="checkbox" value="运营"><span>运营</span></label>
+            <label><input type="checkbox" value="社交"><span>认识朋友</span></label>
+            <label><input type="checkbox" value="作品集"><span>攒作品集</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>愿意出镜程度</label>
+          <div class="chip-group" id="j-camera">
+            <label><input type="radio" name="camera" value="主角"><span>主角都行</span></label>
+            <label><input type="radio" name="camera" value="配角" checked><span>配角可以</span></label>
+            <label><input type="radio" name="camera" value="偶尔"><span>偶尔露脸</span></label>
+            <label><input type="radio" name="camera" value="只做幕后"><span>只做幕后</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="j-strengths">你擅长的事 <span class="tip">会啥说啥:写段子、修图、找场地、砍价都算本事</span></label>
+          <textarea id="j-strengths" maxlength="300" placeholder="例:平时爱写段子,会一点剪映;或者:我有一辆电瓶车和一个很闲的周日"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="j-weakness">不擅长或不愿做的事 <span class="tip">提前说清楚,团队不会硬塞</span></label>
+          <textarea id="j-weakness" maxlength="300" placeholder="例:不想负责催别人交东西;镜头恐惧症晚期"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="j-sunday">周日参与限制 <span class="tip">手册规定周日是主拍摄日</span></label>
+          <input type="text" id="j-sunday" maxlength="200" placeholder="例:每月最后一个周日要回家;一般 10 点后有空">
+        </div>
+
+        <div class="field">
+          <label for="j-goal">你的 12 周个人目标 <span class="tip">进组想收获什么?</span></label>
+          <input type="text" id="j-goal" maxlength="300" placeholder="例:主导拍一条自己写的短剧;学会收声">
+        </div>
+
+        <div class="field">
+          <label for="j-message">想对团队说的话</label>
+          <textarea id="j-message" maxlength="500" placeholder="脑洞、作品链接、自我推销,随便发挥"></textarea>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:26px;">
+          <button type="submit" class="btn primary" id="j-submit">递交角色卡</button>
+          <p class="hand" style="font-size:14px;">递交即表示同意团队查看以上信息,仅用于招募联系。</p>
+        </div>
+      </form>
+
+      <!-- 提交成功后的场记板(默认隐藏) -->
+      <div class="tape-card rv" id="join-done" style="display:none;text-align:center;padding:54px 26px;">
+        <span class="stamp ok stamp-in" style="font-size:26px;">已收到!</span>
+        <h2 class="huazi" style="font-size:30px;margin:20px 0 10px;">角色卡已送达片场</h2>
+        <p style="color:var(--ink-soft);max-width:30em;margin:0 auto;">主理人会在近期查看你的申请,通过后用你留下的联系方式找你。在那之前,不妨先翻翻我们的<a href="manual.html">团队手册</a>,或者<a href="login.html">注册个账号</a>,解锁创作工具的云端功能。</p>
+        <p class="hand" style="margin-top:18px;">开机见,胡拍乱造。</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/join.js"></script>
+</body>
+</html>

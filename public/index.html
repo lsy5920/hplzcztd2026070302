@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>胡拍乱造创作组 · 把脑洞拍出来,把日子造有趣</title>
+  <meta name="description" content="胡拍乱造创作组:四个普通年轻人,把生活里的尴尬、幻想和情绪拍成有反转的喜剧短剧与轻微电影。周日拍戏,长期主义。">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- ========== 开机动画:场记板合板 ========== -->
+  <div class="boot" id="boot" role="button" aria-label="点击跳过开场动画" title="点击跳过">
+    <svg class="clap" viewBox="0 0 320 230" aria-hidden="true">
+      <!-- 场记板板身 -->
+      <g>
+        <rect x="12" y="66" width="296" height="150" rx="10" fill="#22292E" stroke="#0C0F11" stroke-width="3"/>
+        <text x="34" y="112" fill="#F7F3EA" font-family="monospace" font-size="21" letter-spacing="3">胡拍乱造创作组</text>
+        <line x1="30" y1="128" x2="290" y2="128" stroke="#57616A" stroke-width="1.5"/>
+        <text x="34" y="156" fill="#9AA3AA" font-family="monospace" font-size="13" letter-spacing="2">SCENE 01 · TAKE 01</text>
+        <text x="34" y="182" fill="#9AA3AA" font-family="monospace" font-size="13" letter-spacing="2">DIR: 四个人 · SUN 周日开机</text>
+        <circle cx="272" cy="170" r="9" fill="#FF4021"/>
+        <text x="248" y="200" fill="#FF4021" font-family="monospace" font-size="11" letter-spacing="2">REC</text>
+      </g>
+      <!-- 可动顶梁 -->
+      <g class="arm">
+        <rect x="10" y="38" width="300" height="30" rx="6" fill="#F7F3EA" stroke="#0C0F11" stroke-width="3"/>
+        <g fill="#191F24">
+          <path d="M22 68 L52 38 L82 38 L52 68 Z"/>
+          <path d="M82 68 L112 38 L142 38 L112 68 Z"/>
+          <path d="M142 68 L172 38 L202 38 L172 68 Z"/>
+          <path d="M202 68 L232 38 L262 38 L232 68 Z"/>
+          <path d="M262 68 L292 38 L308 38 L308 62 Z"/>
+        </g>
+      </g>
+    </svg>
+    <div class="boot-title" aria-hidden="true"><b>胡</b><b>拍</b><b>乱</b><b>造</b></div>
+    <p class="hint">ACTION!(点击任意处跳过)</p>
+  </div>
+
+  <!-- ========== 导航(由 app.js 渲染) ========== -->
+  <div id="site-nav"></div>
+
+  <main>
+    <!-- ========== 开场:HERO ========== -->
+    <header class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="scene-tag">SCENE 00 · OPENING 开场</span>
+          <h1 class="huazi stroke-white">把<span class="rd">脑洞</span>拍出来,<br>把日子<span class="hl">造有趣</span>。</h1>
+          <p class="lead">我们是「胡拍乱造」——四个普通年轻人,把生活里的尴尬、幻想和情绪,拍成有反转的喜剧短剧与轻微电影。设备不高级,想法管够。</p>
+          <div class="hero-cta">
+            <a class="btn primary" href="join.html">申请加入剧组</a>
+            <a class="btn yellow" href="works.html">看看我们拍什么</a>
+            <a class="btn" href="manual.html">翻开团队手册</a>
+          </div>
+          <div class="hero-meta">
+            <span><b data-count="4">0</b>个成员</span>
+            <span><b data-count="6">0</b>个系列</span>
+            <span><b data-count="24">0</b>个选题方向</span>
+            <span><b data-count="12">0</b>周试运行</span>
+          </div>
+        </div>
+
+        <!-- 可点击的场记板 -->
+        <div class="hero-clap" id="hero-clap" title="点我合一次板!">
+          <svg viewBox="0 0 340 260" aria-label="胡拍乱造场记板,点击可以开合" role="img">
+            <g>
+              <rect x="14" y="72" width="312" height="170" rx="12" fill="#22292E" stroke="#0C0F11" stroke-width="3.5"/>
+              <text x="38" y="122" fill="#F7F3EA" font-family="monospace" font-size="23" letter-spacing="3">胡拍乱造创作组</text>
+              <line x1="34" y1="140" x2="306" y2="140" stroke="#57616A" stroke-width="1.5"/>
+              <text x="38" y="170" fill="#9AA3AA" font-family="monospace" font-size="14" letter-spacing="2">PROD: 首个12周计划</text>
+              <text x="38" y="196" fill="#9AA3AA" font-family="monospace" font-size="14" letter-spacing="2">DATE: 每周日 · 开机</text>
+              <text x="38" y="222" fill="#9AA3AA" font-family="monospace" font-size="14" letter-spacing="2">TAKE: 完成优于完美</text>
+              <circle cx="292" cy="208" r="10" fill="#FF4021"/>
+            </g>
+            <g class="arm2">
+              <rect x="12" y="42" width="316" height="32" rx="7" fill="#F7F3EA" stroke="#0C0F11" stroke-width="3.5"/>
+              <g fill="#191F24">
+                <path d="M26 74 L58 42 L90 42 L58 74 Z"/>
+                <path d="M90 74 L122 42 L154 42 L122 74 Z"/>
+                <path d="M154 74 L186 42 L218 42 L186 74 Z"/>
+                <path d="M218 74 L250 42 L282 42 L250 74 Z"/>
+                <path d="M282 74 L314 42 L328 42 L328 66 Z"/>
+              </g>
+            </g>
+          </svg>
+          <span class="tag stamp ok stamp-in">开机!</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ========== 口号跑马灯 ========== -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>把脑洞拍出来<i>★</i>把日子造有趣<i>★</i>周日开机<i>★</i>完成优于完美<i>★</i>轮流做主角<i>★</i>对事不对人<i>★</i>作品要留痕<i>★</i>先拍出作品,再一起变强<i>★</i></span>
+      </div>
+    </div>
+
+    <!-- ========== SCENE 01 我们是谁 ========== -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head rv">
+          <span class="scene-tag">SCENE 01 · 我们是谁</span>
+          <h2 class="huazi">四个普通人,<span class="hl">一个片场</span></h2>
+          <p class="hand">—— 不是公司,不是MCN,是四个下了班还想拍点东西的年轻人。</p>
+        </div>
+
+        <div class="hero-grid" style="align-items:stretch;">
+          <div class="tape-card rv" style="--d:.05s">
+            <h3 style="font-size:20px;font-weight:900;margin-bottom:10px;">使命</h3>
+            <p style="color:var(--ink-soft);">用低成本但有想法的短视频,把四个人的生活观察、表演欲和电影兴趣,变成可持续的作品。</p>
+            <h3 style="font-size:20px;font-weight:900;margin:18px 0 10px;">愿景</h3>
+            <p style="color:var(--ink-soft);">12 周之后,成为一个「不依赖某个人临时爆发,也能稳定完成作品」的小型创作团队;一年之后,拥有可辨认的系列、代表作和共同成长记录。</p>
+          </div>
+          <div class="rv" style="--d:.15s;display:grid;gap:14px;align-content:start;">
+            <div class="pin-note">兴趣第一:做完作品后仍愿意继续,而不是把业余创作变成第二份压迫性工作。</div>
+            <div class="pin-note" style="transform:rotate(-1deg);">完成优于完美:先做可发布版本,再根据反馈升级,禁止因小瑕疵无限延期。</div>
+            <div class="pin-note" style="transform:rotate(.6deg);">轮流做主角:每个人都能提创意、当主创、学新岗位,不存在「老板和帮忙的人」。</div>
+            <div class="pin-note" style="transform:rotate(-.8deg);">作品留痕:脚本、素材、数据、复盘都归档,让经验能够复用。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SCENE 02 剧组四人 ========== -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head rv">
+          <span class="scene-tag">SCENE 02 · 剧组名单</span>
+          <h2 class="huazi">一人一岗,<span class="rd">互为替补</span></h2>
+          <p class="hand">—— 主岗管专业,副岗管救场;每条作品都有一位「本条主创」。</p>
+        </div>
+
+        <div class="crew-grid">
+          <div class="tape-card crew-card rv" style="--d:0s">
+            <div class="crew-face" style="background:var(--rec);">A</div>
+            <h3>成员 A</h3>
+            <p class="role">主理人 / 创意导演</p>
+            <p>把脑洞收束成能拍的版本;主持选题会;现场表演与导演;创意争议终审。</p>
+            <div class="duty"><span>副岗:编剧</span><span>出镜</span><span>账号方向</span></div>
+          </div>
+          <div class="tape-card crew-card tilt-r rv" style="--d:.1s">
+            <div class="crew-face" style="background:var(--tape);color:var(--ink);">B</div>
+            <h3>成员 B</h3>
+            <p class="role">制片统筹 / 发布运营</p>
+            <p>管共享看板、场地道具授权、发布排期,以及评论与数据归档——剧组的大管家。</p>
+            <div class="duty"><span>副岗:场务</span><span>数据记录</span></div>
+          </div>
+          <div class="tape-card crew-card rv" style="--d:.2s">
+            <div class="crew-face" style="background:var(--blue);">C</div>
+            <h3>成员 C</h3>
+            <p class="role">摄影 / 剪辑技术</p>
+            <p>机位、收声、曝光一手抓;素材双备份;粗剪精剪与技术规范,让画面替故事说话。</p>
+            <div class="duty"><span>副岗:灯光</span><span>声音</span><span>素材管理</span></div>
+          </div>
+          <div class="tape-card crew-card tilt-r rv" style="--d:.3s">
+            <div class="crew-face" style="background:var(--green);">D</div>
+            <h3>成员 D</h3>
+            <p class="role">编剧 / 表演 / 美术道具</p>
+            <p>共同写作与角色塑造;道具与画面细节;场记与封面文案,片场的多面手。</p>
+            <div class="duty"><span>副岗:场记</span><span>封面文案</span></div>
+          </div>
+        </div>
+
+        <p class="hand rv" style="text-align:center;margin-top:26px;font-size:16px;">批注:成员暂以 A/B/C/D 代号出场,第 4 周根据真实表现调整岗位。你可能就是下一个字母。</p>
+      </div>
+    </section>
+
+    <!-- ========== SCENE 03 拍什么 ========== -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head rv">
+          <span class="scene-tag">SCENE 03 · 内容配方</span>
+          <h2 class="huazi">四大支柱,<span class="hl">比例配好</span></h2>
+          <p class="hand">—— 稳定更新靠喜剧,新鲜感靠脑洞,审美靠微电影,真实感靠幕后。</p>
+        </div>
+
+        <div class="tape-card no-tape rv">
+          <div class="pillar-list">
+            <div class="pillar">
+              <h3>生活反转喜剧<span class="sub">15-45 秒 · 建立共鸣与人物感</span></h3>
+              <div class="pillar-bar" data-bar><i style="--c:var(--rec);--w:45%;"></i></div>
+              <span class="pct">45%</span>
+            </div>
+            <div class="pillar">
+              <h3>脑洞创意实验<span class="sub">10-40 秒 · ENFP 式联想现场</span></h3>
+              <div class="pillar-bar" data-bar><i style="--c:var(--tape);--w:25%;--d:.15s;"></i></div>
+              <span class="pct">25%</span>
+            </div>
+            <div class="pillar">
+              <h3>轻微电影 / 情绪短片<span class="sub">45 秒-3 分钟 · 建立审美与代表作</span></h3>
+              <div class="pillar-bar" data-bar><i style="--c:var(--blue);--w:20%;--d:.3s;"></i></div>
+              <span class="pct">20%</span>
+            </div>
+            <div class="pillar">
+              <h3>幕后与成长记录<span class="sub">15-60 秒 · 记录四个人的进步</span></h3>
+              <div class="pillar-bar" data-bar><i style="--c:var(--green);--w:10%;--d:.45s;"></i></div>
+              <span class="pct">10%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SCENE 04 系列栏目 ========== -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head rv">
+          <span class="scene-tag">SCENE 04 · 系列企划</span>
+          <h2 class="huazi">六个<span class="rd">正在孵化</span>的系列</h2>
+          <p class="hand">—— 比单条爆款更重要的,是能一直拍下去的设定。</p>
+        </div>
+
+        <div class="series-grid">
+          <div class="tape-card series-card rv" style="--d:0s">
+            <div class="board" style="--c-bg:#FFD9CF;">
+              <span class="no">SERIES 01 · 难度 低</span>
+              <h3>《脑内弹幕失控》</h3>
+            </div>
+            <p>角色的内心 OS 突然被别人听见——开会时,每个人脑子里在拍不同的电影。</p>
+            <div class="foot"><span>喜剧短剧</span><span>15-45s</span></div>
+          </div>
+          <div class="tape-card series-card tilt-r rv" style="--d:.08s">
+            <div class="board" style="--c-bg:#FFE9A8;">
+              <span class="no">SERIES 02 · 难度 低-中</span>
+              <h3>《如果生活有类型片滤镜》</h3>
+            </div>
+            <p>把普通场景拍成悬疑、动作、青春片——下班抢电梯,也能拍成谍战大片。</p>
+            <div class="foot"><span>脑洞实验</span><span>10-40s</span></div>
+          </div>
+          <div class="tape-card series-card rv" style="--d:.16s">
+            <div class="board" style="--c-bg:#D6E4FF;">
+              <span class="no">SERIES 03 · 难度 低</span>
+              <h3>《四人合租宇宙》</h3>
+            </div>
+            <p>四个性格不同的人处理同一件小事——谁去拿外卖,都能变成权力的游戏。</p>
+            <div class="foot"><span>喜剧短剧</span><span>15-45s</span></div>
+          </div>
+          <div class="tape-card series-card tilt-r rv" style="--d:.24s">
+            <div class="board" style="--c-bg:#D3F0DC;">
+              <span class="no">SERIES 04 · 难度 低</span>
+              <h3>《成年人说明书》</h3>
+            </div>
+            <p>用说明书和教程的语气,一本正经地讲荒诞现实——如何优雅地假装听懂领导。</p>
+            <div class="foot"><span>脑洞实验</span><span>10-40s</span></div>
+          </div>
+          <div class="tape-card series-card rv" style="--d:.32s">
+            <div class="board" style="--c-bg:#E8E1F5;">
+              <span class="no">SERIES 05 · 难度 中-高</span>
+              <h3>《胡拍乱造·微电影》</h3>
+            </div>
+            <p>一个小冲突加一个情绪反转——朋友替你保存了没说出口的梦想。</p>
+            <div class="foot"><span>轻微电影</span><span>45s-3min</span></div>
+          </div>
+          <div class="tape-card series-card tilt-r rv" style="--d:.4s">
+            <div class="board" style="--c-bg:#EFE9DB;">
+              <span class="no">SERIES 06 · 难度 低</span>
+              <h3>《没拍成也有戏》</h3>
+            </div>
+            <p>失败镜头、争论和幕后学习——一个镜头 NG 十次之后,发生了什么?</p>
+            <div class="foot"><span>幕后记录</span><span>15-60s</span></div>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:34px;" class="rv">
+          <a class="btn yellow" href="works.html">看全部 24 个选题方向 →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SCENE 05 一周流程 ========== -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head rv">
+          <span class="scene-tag">SCENE 05 · 每周节奏</span>
+          <h2 class="huazi">按天异步,<span class="hl">周日开机</span></h2>
+          <p class="hand">—— 不规定几点上线,只要求当天交付;四个时间不同的人,也能拍完一条片。</p>
+        </div>
+
+        <div class="week-strip rv" id="week-strip">
+          <div class="day-card" data-day="1">
+            <span class="d">MON 周一</span>
+            <h4>复盘 + 攒灵感</h4>
+            <p>上周数据复盘 3 条结论;每人至少交 1 张灵感卡。</p>
+          </div>
+          <div class="day-card" data-day="2">
+            <span class="d">TUE 周二</span>
+            <h4>选题会</h4>
+            <p>异步投票,锁定本周 2-3 个题目和各自主创。</p>
+          </div>
+          <div class="day-card" data-day="3">
+            <span class="d">WED 周三</span>
+            <h4>脚本初稿</h4>
+            <p>主创完成脚本 V1:关键台词与结尾方式。</p>
+          </div>
+          <div class="day-card" data-day="4">
+            <span class="d">THU 周四</span>
+            <h4>锁版!</h4>
+            <p>脚本 V2_LOCK + 镜头清单;之后不改核心结构。</p>
+          </div>
+          <div class="day-card" data-day="5">
+            <span class="d">FRI 周五</span>
+            <h4>制片准备</h4>
+            <p>场地、服装、道具、授权清单;高风险项直接删。</p>
+          </div>
+          <div class="day-card" data-day="6">
+            <span class="d">SAT 周六</span>
+            <h4>轻排练</h4>
+            <p>走位视频或语音排练;设备与存储检查。</p>
+          </div>
+          <div class="day-card sunday" data-day="0">
+            <span class="d">SUN 周日</span>
+            <h4>集中拍摄 🎬</h4>
+            <p>批量拍 2-4 条短视频;素材当日双备份。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SCENE 06 12周路线 ========== -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head rv">
+          <span class="scene-tag">SCENE 06 · 十二周路线</span>
+          <h2 class="huazi">先跑通,<span class="rd">再成型</span>,后沉淀</h2>
+          <p class="hand">—— 12 周结束时,只要团队还想继续、流程能转、有 2 条自己真心满意的作品,就算成功。</p>
+        </div>
+
+        <div class="roadmap">
+          <div class="tape-card road-card rv" style="--d:0s">
+            <span class="phase">阶段一 · 第 1-4 周</span>
+            <h3>跑通流程</h3>
+            <ul>
+              <li>确定角色、看板、命名与发布流程</li>
+              <li>完成 6-8 条低成本短视频</li>
+              <li>测试两个系列,第 4 周调整岗位</li>
+            </ul>
+          </div>
+          <div class="tape-card road-card tilt-r rv" style="--d:.12s">
+            <span class="phase">阶段二 · 第 5-8 周</span>
+            <h3>内容成型</h3>
+            <ul>
+              <li>稳定喜剧结构与统一包装</li>
+              <li>选出 1 个主打系列</li>
+              <li>完成第一部轻微电影 + 幕后</li>
+            </ul>
+          </div>
+          <div class="tape-card road-card rv" style="--d:.24s">
+            <span class="phase">阶段三 · 第 9-12 周</span>
+            <h3>优化沉淀</h3>
+            <ul>
+              <li>根据数据优化开头、节奏、角色</li>
+              <li>第二部微电影或代表作</li>
+              <li>总结 18-24 条目标,修订手册 V2.0</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SCENE 07 加入CTA ========== -->
+    <section class="section">
+      <div class="container">
+        <div class="tape-card rv" style="text-align:center;padding:52px 26px 48px;">
+          <span class="stamp ok" style="font-size:18px;">正在招募</span>
+          <h2 class="huazi" style="font-size:clamp(26px,4.6vw,42px);margin:18px 0 12px;">缺的不是设备,<br>是<span class="rd">敢一起胡拍</span>的你</h2>
+          <p style="color:var(--ink-soft);max-width:34em;margin:0 auto 8px;">会表演、会写、会拍、会剪、会运营,或者只是特别想试试——都欢迎。填一张「成员角色卡」,主理人会亲自查看每一份申请。</p>
+          <p class="hand" style="margin-bottom:26px;">周日拍戏,其余按天异步。兴趣优先,不设 KPI。</p>
+          <div class="hero-cta" style="justify-content:center;">
+            <a class="btn primary" href="join.html">填写申请,加入片场</a>
+            <a class="btn" href="login.html">已有账号?登录</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== 页脚(由 app.js 渲染) ========== -->
+  <div id="site-footer"></div>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/home.js"></script>
+</body>
+</html>

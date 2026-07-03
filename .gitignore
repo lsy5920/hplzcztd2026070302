@@ -1,0 +1,13 @@
+# ===== 依赖与本地缓存(不需要上传到 GitHub)=====
+node_modules/
+.wrangler/
+.dev.vars
+
+# ===== 系统临时文件 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 编辑器配置 =====
+.vscode/
+.idea/

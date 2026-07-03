@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>成员空间 · 胡拍乱造创作组</title>
+  <meta name="description" content="胡拍乱造成员空间:今日任务、灵感池看板、入队申请审核与成员管理。">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <div id="site-nav"></div>
+
+  <main>
+    <!-- 未登录 / 加载中的占位 -->
+    <div class="container" id="dash-guard" style="padding:90px 22px;text-align:center;">
+      <p class="hand" style="font-size:18px;">正在核对你的片场通行证……</p>
+    </div>
+
+    <!-- 登录后的主体(默认隐藏,JS 校验通过后显示) -->
+    <div id="dash-main" style="display:none;">
+      <header class="page-hero container" style="padding-bottom:20px;">
+        <span class="scene-tag">SCENE 07 · 成员空间</span>
+        <h1 class="huazi stroke-white" style="font-size:clamp(30px,5vw,46px);">你好,<span class="rd" id="dash-name">成员</span> <span id="dash-role"></span></h1>
+        <p class="hand" id="dash-greet">—— 今天也要把脑洞拍出来。</p>
+      </header>
+
+      <div class="container">
+        <!-- ===== 今日任务卡 ===== -->
+        <section class="section" style="padding-top:20px;">
+          <div class="section-head">
+            <span class="scene-tag">TODAY · 今日交付</span>
+            <h2 class="huazi" id="today-title">今天是<span class="hl">周几</span></h2>
+            <p class="hand">—— 按手册周流程,今天该做这些。不规定几点,当天完成即可。</p>
+          </div>
+          <div class="tape-card" id="today-card">
+            <!-- 由 dashboard.js 按星期渲染 -->
+          </div>
+        </section>
+
+        <!-- ===== 灵感池看板 ===== -->
+        <section class="section">
+          <div class="section-head">
+            <span class="scene-tag">BOARD · 灵感池看板</span>
+            <h2 class="huazi">灵感池<span class="rd">共享看板</span></h2>
+            <p class="hand">—— 手册 11.1 的看板搬到了线上。全组灵感都在这里,团队成员可拖动流转。</p>
+          </div>
+
+          <!-- 快速投灵感 -->
+          <div class="tape-card no-tape" style="margin-bottom:24px;">
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+              <div class="field" style="flex:1 1 320px;margin-bottom:0;">
+                <label for="quick-idea">快速投一个灵感 <span class="tip">一句话设定,如果______会怎样</span></label>
+                <input type="text" id="quick-idea" maxlength="80" placeholder="如果周一早上能被跳过……">
+              </div>
+              <button class="btn primary" id="quick-idea-btn">投进灵感池</button>
+              <a class="btn ghost" href="tools.html#idea">填完整灵感卡 →</a>
+            </div>
+          </div>
+
+          <div class="board-grid" id="board-grid">
+            <div class="board-col" data-status="pool"><h3>灵感池 <span class="n" data-count-col="pool">0</span></h3><div class="col-body" data-body="pool"></div></div>
+            <div class="board-col" data-status="review"><h3>待评估 <span class="n" data-count-col="review">0</span></h3><div class="col-body" data-body="review"></div></div>
+            <div class="board-col" data-status="selected"><h3>已入选 <span class="n" data-count-col="selected">0</span></h3><div class="col-body" data-body="selected"></div></div>
+            <div class="board-col" data-status="hold"><h3>暂存 <span class="n" data-count-col="hold">0</span></h3><div class="col-body" data-body="hold"></div></div>
+          </div>
+          <p class="hand" id="board-role-tip" style="margin-top:16px;"></p>
+        </section>
+
+        <!-- ===== 主理人:入队申请审核 ===== -->
+        <section class="section admin-only" style="display:none;">
+          <div class="section-head">
+            <span class="scene-tag">ADMIN · 入队申请</span>
+            <h2 class="huazi">谁想<span class="hl">进组</span></h2>
+            <p class="hand">—— 只有你看得到。通过后请用对方留的联系方式主动联系。</p>
+          </div>
+          <div id="applications-list"><div class="empty">加载中……</div></div>
+        </section>
+
+        <!-- ===== 主理人:成员管理 ===== -->
+        <section class="section admin-only" style="display:none;">
+          <div class="section-head">
+            <span class="scene-tag">ADMIN · 成员管理</span>
+            <h2 class="huazi">剧组<span class="rd">花名册</span></h2>
+            <p class="hand">—— 把通过面试的队友提升为「团队成员」,解锁看板流转权限。</p>
+          </div>
+          <div id="members-list"><div class="empty">加载中……</div></div>
+        </section>
+
+        <!-- 退出 -->
+        <div class="container" style="text-align:center;padding:20px 0 10px;">
+          <button class="btn ghost" id="dash-logout">退出登录</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/dashboard.js"></script>
+</body>
+</html>
