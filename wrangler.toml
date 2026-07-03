@@ -14,4 +14,4 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "hplz-db"
-database_id = "a77a3682-ae6e-4de8-97e7-c2cd3e971c93"
+database_id = "88e31247-da7c-4643-80cd-8aa54563e0b3"
