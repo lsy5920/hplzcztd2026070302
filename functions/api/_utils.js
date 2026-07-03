@@ -44,6 +44,59 @@ export function isNoTableError(err) {
   return /no such table/i.test(String(err && err.message ? err.message : err));
 }
 
+/* ---------- 自动建表(首次请求时运行,幂等) ----------
+   避免用户必须手动在 D1 控制台执行 schema.sql。
+   使用 IF NOT EXISTS，无论表是否存在都安全执行。 */
+export async function ensureTables(db) {
+  await db.batch([
+    db.prepare(`CREATE TABLE IF NOT EXISTS users (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      username      TEXT NOT NULL UNIQUE,
+      display_name  TEXT NOT NULL,
+      password_hash TEXT NOT NULL,
+      salt          TEXT NOT NULL,
+      role          TEXT NOT NULL DEFAULT 'visitor',
+      created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS sessions (
+      token      TEXT PRIMARY KEY,
+      user_id    INTEGER NOT NULL,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS applications (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      name         TEXT NOT NULL,
+      contact      TEXT NOT NULL,
+      wish         TEXT NOT NULL DEFAULT '',
+      on_camera    TEXT NOT NULL DEFAULT '',
+      strengths    TEXT NOT NULL DEFAULT '',
+      weakness     TEXT NOT NULL DEFAULT '',
+      sunday_limit TEXT NOT NULL DEFAULT '',
+      goal         TEXT NOT NULL DEFAULT '',
+      message      TEXT NOT NULL DEFAULT '',
+      status       TEXT NOT NULL DEFAULT 'pending',
+      reviewed_by  INTEGER,
+      reviewed_at  TEXT,
+      created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS ideas (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id     INTEGER NOT NULL,
+      title       TEXT NOT NULL,
+      observation TEXT NOT NULL DEFAULT '',
+      rule        TEXT NOT NULL DEFAULT '',
+      escalation  TEXT NOT NULL DEFAULT '',
+      ending      TEXT NOT NULL DEFAULT '',
+      resources   TEXT NOT NULL DEFAULT '',
+      risk        TEXT NOT NULL DEFAULT '',
+      score_total INTEGER NOT NULL DEFAULT 0,
+      status      TEXT NOT NULL DEFAULT 'pool',
+      created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+  ]);
+}
+
 /* ---------- 十六进制编解码 ---------- */
 export function bufToHex(buf) {
   return Array.from(new Uint8Array(buf))
