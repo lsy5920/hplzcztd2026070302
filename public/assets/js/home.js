@@ -5,22 +5,19 @@
   "use strict";
 
   /* ---------- 1. 开机场记板动画 ----------
-     每个浏览器标签页只完整播放一次(sessionStorage 记录),
-     刷新或从其他页返回时不再打扰;点击可随时跳过 */
+     每次刷新都完整播放;点击可随时跳过 */
   const boot = document.getElementById("boot");
   if (boot) {
-    const played = sessionStorage.getItem("hplz_boot_played");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function endBoot() {
       if (boot.classList.contains("done")) return;
       boot.classList.add("done");
-      sessionStorage.setItem("hplz_boot_played", "1");
       // 动画结束后彻底移除,避免遮挡点击
       setTimeout(function () { boot.remove(); }, 700);
     }
 
-    if (played || reduced) {
+    if (reduced) {
       boot.remove();
     } else {
       boot.addEventListener("click", endBoot);
