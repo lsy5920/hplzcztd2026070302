@@ -488,6 +488,63 @@
         return (
           '<div class="list-row">' +
           '<div class="grow">' +
+            '<h4>' + HPLZ.esc(app.name) +
+              ' <span class="role-badge ' + (isPending ? "visitor" : app.status === "approved" ? "member" : "") + '">' +
+              (statusLabel[app.status] || app.status) + "</span></h4>" +
+            '<p class="sub">联系：' + HPLZ.esc(app.contact) + " · " + (app.created_at || "").slice(0, 10) + "</p>" +
+            (app.wish ? '<p class="sub">希望：' + HPLZ.esc(app.wish) + "</p>" : "") +
+            (app.strengths ? '<p class="sub">擅长：' + HPLZ.esc(app.strengths) + "</p>" : "") +
+            (app.message ? '<p class="sub">Ta 说：' + HPLZ.esc(app.message) + "</p>" : "") +
+          "</div>" +
+          (isPending
+            ? '<div class="ops" style="flex-direction:column;gap:8px;">' +
+              '<div style="display:flex;gap:8px;">' +
+                '<button class="btn sm primary" data-appid="' + app.id + '" data-action="approve">通过</button>' +
+                '<button class="btn sm ghost" data-appid="' + app.id + '" data-action="reject">婉拒</button>' +
+              "</div>" +
+              '<input type="text" class="reject-note-input" data-appid="' + app.id + '" maxlength="200" ' +
+                'placeholder="驳回备注（选填，会发邮件给对方）" ' +
+                'style="border:1.5px solid var(--line);border-radius:6px;padding:8px 10px;font-family:inherit;font-size:13.5px;width:100%;max-width:300px;">' +
+              "</div>"
+            : "") +
+          "</div>"
+        );
+      }).join("");
+      wrap.querySelectorAll("[data-action]").forEach(function (btn) {
+        btn.addEventListener("click", async function () {
+          const id     = parseInt(btn.dataset.appid, 10);
+          const action = btn.dataset.action;
+          const noteEl = wrap.querySelector('.reject-note-input[data-appid="' + id + '"]');
+          const note   = noteEl ? noteEl.value.trim() : "";
+          btn.disabled = true;
+          try {
+            const res = await HPLZ.api("/api/applications/review", {
+              method: "POST", body: { id, action, reject_note: note },
+            });
+            HPLZ.toast(res.message, "ok");
+            loadApplications();
+          } catch (err) { HPLZ.toast(err.message, "err"); btn.disabled = false; }
+        });
+      });
+    } catch (err) {
+      if (wrap) wrap.innerHTML = '<div class="empty">' + HPLZ.esc(err.message) + "</div>";
+    }
+  }
+
+  /* ===== 主理人：申请审核 ===== */
+  async function loadApplications() {
+    const wrap = $("#applications-list");
+    if (!wrap) return;
+    try {
+      const data = await HPLZ.api("/api/applications");
+      const apps = data.applications || [];
+      if (!apps.length) { wrap.innerHTML = '<div class="empty">暂无申请</div>'; return; }
+      const statusLabel = { pending: "待审核", approved: "已通过", rejected: "已婉拒" };
+      wrap.innerHTML = apps.map(function (app) {
+        const isPending = app.status === "pending";
+        return (
+          '<div class="list-row">' +
+          '<div class="grow">' +
           '<h4>' + HPLZ.esc(app.name) +
             ' <span class="role-badge ' + (isPending ? "visitor" : (app.status === "approved" ? "member" : "")) + '">' +
             (statusLabel[app.status] || app.status) + "</span></h4>" +
