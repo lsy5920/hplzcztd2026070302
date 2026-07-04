@@ -400,8 +400,9 @@
       '        <div class="field" id="mrf-display"><label for="mr-display">昵称</label>' +
       '          <input type="text" id="mr-display" maxlength="20" placeholder="片场里大家怎么叫你">' +
       '          <span class="err">昵称不能为空</span></div>' +
-      '        <div class="field"><label for="mr-email">邮箱 <span class="tip">用于接收审核通知，可以后再填</span></label>' +
-      '          <input type="email" id="mr-email" autocomplete="email" maxlength="120" placeholder="例:xiaoming@example.com"></div>' +
+      '        <div class="field" id="mrf-email"><label for="mr-email">邮箱 * <span class="tip">用于接收申请审核通知</span></label>' +
+      '          <input type="email" id="mr-email" autocomplete="email" maxlength="120" placeholder="例:xiaoming@example.com" required>' +
+      '          <span class="err">请填写有效的邮箱地址</span></div>' +
       '        <div class="field" id="mrf-password"><label for="mr-password">密码 <span class="tip">至少6位</span></label>' +
       '          <input type="password" id="mr-password" autocomplete="new-password" maxlength="64" placeholder="至少6位">' +
       '          <span class="err">密码需6-64位</span></div>' +
@@ -476,13 +477,15 @@
       var pwd2     = div.querySelector("#mr-password2").value;
       var okUser   = /^[A-Za-z0-9_]{3,20}$/.test(username);
       var okDisp   = display.length >= 1;
+      var okEmail  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       var okPwd    = pwd.length >= 6 && pwd.length <= 64;
       var okSame   = pwd === pwd2;
       setMInvalid("mrf-username", !okUser);
       setMInvalid("mrf-display", !okDisp);
+      setMInvalid("mrf-email", !okEmail);
       setMInvalid("mrf-password", !okPwd);
       setMInvalid("mrf-password2", !okSame);
-      if (!okUser || !okDisp || !okPwd || !okSame) return;
+      if (!okUser || !okDisp || !okEmail || !okPwd || !okSame) return;
       var btn = div.querySelector("#mregister-btn");
       btn.disabled = true; btn.textContent = "注册中…";
       try {

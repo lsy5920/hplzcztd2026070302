@@ -725,12 +725,13 @@ body.menu-open .nav-drawer { display: block; animation: drawerin .35s var(--ease
   position: relative;
   transform: rotate(2.5deg);
   transition: transform .4s var(--ease-pop);
+  overflow: visible; /* 允许 SVG 手臂旋转时超出容器边界，不被截断 */
   cursor: pointer;
   animation: floaty 5.5s ease-in-out infinite;
   --tilt: 2.5deg;
 }
 .hero-clap:hover { transform: rotate(.5deg) scale(1.02); }
-.hero-clap svg { width: 100%; height: auto; filter: drop-shadow(0 22px 34px rgba(25,31,36,.28)); }
+.hero-clap svg { width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 22px 34px rgba(25,31,36,.28)); }
 .hero-clap .arm2 { transform-origin: 14px 70px; transition: transform .45s var(--ease-pop); }
 .hero-clap.open .arm2 { transform: rotate(-24deg); }
 .hero-clap .tag {

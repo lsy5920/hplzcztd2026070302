@@ -1,0 +1,19 @@
+# ============================================================
+# Cloudflare Pages 响应头配置
+# HTML 文件不缓存(每次都从服务器拉最新版)
+# JS/CSS 允许较长缓存但 Cloudflare 会在更新时自动 purge
+# ============================================================
+
+/*.html
+  Cache-Control: no-cache, must-revalidate
+
+/
+  Cache-Control: no-cache, must-revalidate
+
+# API 接口也不缓存
+/api/*
+  Cache-Control: no-store
+
+# 静态资源(CSS/JS/图片)允许缓存，用版本参数控制更新
+/assets/*
+  Cache-Control: public, max-age=86400

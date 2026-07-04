@@ -474,56 +474,59 @@
     input.addEventListener("keydown", function (e) { if (e.key === "Enter") btn.click(); });
   }
 
-  /* ===== 主理人：申请审核 ===== */
-  async function loadApplications() {
-    const wrap = $("#applications-list");
+  /* ===== 主理人：成员管理 ===== */
+  async function loadMembers() {
+    const wrap = $("#members-list");
     if (!wrap) return;
     try {
-      const data = await HPLZ.api("/api/applications");
-      const apps = data.applications || [];
-      if (!apps.length) { wrap.innerHTML = '<div class="empty">暂无申请</div>'; return; }
-      const statusLabel = { pending: "待审核", approved: "已通过", rejected: "已婉拒" };
-      wrap.innerHTML = apps.map(function (app) {
-        const isPending = app.status === "pending";
+      const data = await HPLZ.api("/api/members");
+      const members = data.members || [];
+      if (!members.length) { wrap.innerHTML = '<div class="empty">还没有注册用户</div>'; return; }
+      const jobOpts = [""].concat(JOB_OPTIONS).map(function (o) {
+        return '<option value="' + HPLZ.esc(o) + '">' + (o || "-- 选择职位 --") + "</option>";
+      }).join("");
+      wrap.innerHTML = members.map(function (m) {
+        const isMe = m.id === currentUser.id;
         return (
           '<div class="list-row">' +
-          '<div class="grow">' +
-            '<h4>' + HPLZ.esc(app.name) +
-              ' <span class="role-badge ' + (isPending ? "visitor" : app.status === "approved" ? "member" : "") + '">' +
-              (statusLabel[app.status] || app.status) + "</span></h4>" +
-            '<p class="sub">联系：' + HPLZ.esc(app.contact) + " · " + (app.created_at || "").slice(0, 10) + "</p>" +
-            (app.wish ? '<p class="sub">希望：' + HPLZ.esc(app.wish) + "</p>" : "") +
-            (app.strengths ? '<p class="sub">擅长：' + HPLZ.esc(app.strengths) + "</p>" : "") +
-            (app.message ? '<p class="sub">Ta 说：' + HPLZ.esc(app.message) + "</p>" : "") +
-          "</div>" +
-          (isPending
-            ? '<div class="ops" style="flex-direction:column;gap:8px;">' +
-              '<div style="display:flex;gap:8px;">' +
-                '<button class="btn sm primary" data-appid="' + app.id + '" data-action="approve">通过</button>' +
-                '<button class="btn sm ghost" data-appid="' + app.id + '" data-action="reject">婉拒</button>' +
-              "</div>" +
-              '<input type="text" class="reject-note-input" data-appid="' + app.id + '" maxlength="200" ' +
-                'placeholder="驳回备注（选填，会发邮件给对方）" ' +
-                'style="border:1.5px solid var(--line);border-radius:6px;padding:8px 10px;font-family:inherit;font-size:13.5px;width:100%;max-width:300px;">' +
-              "</div>"
-            : "") +
-          "</div>"
+          '<div class="grow"><h4>' + HPLZ.esc(m.display_name) +
+            ' <span class="role-badge ' + m.role + '">' + (ROLE_NAMES[m.role] || m.role) + "</span>" +
+            (isMe ? ' <span class="role-badge visitor" style="background:var(--tape);">我</span>' : "") + "</h4>" +
+            '<p class="sub">@' + HPLZ.esc(m.username) + " · 职位：" + HPLZ.esc(m.job_title || "未设置") + "</p></div>" +
+          '<div class="ops" style="flex-direction:column;gap:8px;">' +
+            '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+              '<select class="job-sel" data-uid="' + m.id + '" style="border:1.5px solid var(--ink);border-radius:6px;padding:6px 10px;font-family:inherit;font-size:13px;">' + jobOpts + "</select>" +
+              '<button class="btn sm yellow job-set" data-uid="' + m.id + '">设职位</button>' +
+            "</div>" +
+            (!isMe && m.role !== "admin"
+              ? (m.role === "visitor"
+                  ? '<button class="btn sm primary role-up" data-uid="' + m.id + '">提升为成员</button>'
+                  : '<button class="btn sm ghost role-down" data-uid="' + m.id + '">调回访客</button>')
+              : "") +
+          "</div></div>"
         );
       }).join("");
-      wrap.querySelectorAll("[data-action]").forEach(function (btn) {
+      wrap.querySelectorAll(".job-set").forEach(function (btn) {
         btn.addEventListener("click", async function () {
-          const id     = parseInt(btn.dataset.appid, 10);
-          const action = btn.dataset.action;
-          const noteEl = wrap.querySelector('.reject-note-input[data-appid="' + id + '"]');
-          const note   = noteEl ? noteEl.value.trim() : "";
+          const uid = parseInt(btn.dataset.uid, 10);
+          const sel = wrap.querySelector('.job-sel[data-uid="' + uid + '"]');
           btn.disabled = true;
           try {
-            const res = await HPLZ.api("/api/applications/review", {
-              method: "POST", body: { id, action, reject_note: note },
-            });
-            HPLZ.toast(res.message, "ok");
-            loadApplications();
-          } catch (err) { HPLZ.toast(err.message, "err"); btn.disabled = false; }
+            const res = await HPLZ.api("/api/members/role", { method: "POST", body: { id: uid, action: "job_title", job_title: sel ? sel.value : "" } });
+            HPLZ.toast(res.message, "ok"); loadMembers(); loadCrewCards();
+          } catch (err) { HPLZ.toast(err.message, "err"); }
+          btn.disabled = false;
+        });
+      });
+      wrap.querySelectorAll(".role-up,.role-down").forEach(function (btn) {
+        btn.addEventListener("click", async function () {
+          btn.disabled = true;
+          const role = btn.classList.contains("role-up") ? "member" : "visitor";
+          try {
+            const res = await HPLZ.api("/api/members/role", { method: "POST", body: { id: parseInt(btn.dataset.uid, 10), action: "role", role } });
+            HPLZ.toast(res.message, "ok"); loadMembers(); loadCrewCards();
+          } catch (err) { HPLZ.toast(err.message, "err"); }
+          btn.disabled = false;
         });
       });
     } catch (err) {
@@ -531,25 +534,26 @@
     }
   }
 
-  /* ===== 主理人：申请审核 ===== */
-  async function loadApplications() {
-    const wrap = $("#applications-list");
-    if (!wrap) return;
-    try {
-      const data = await HPLZ.api("/api/applications");
-      const apps = data.applications || [];
-      if (!apps.length) { wrap.innerHTML = '<div class="empty">暂无申请</div>'; return; }
-      const statusLabel = { pending: "待审核", approved: "已通过", rejected: "已婉拒" };
-      wrap.innerHTML = apps.map(function (app) {
-        const isPending = app.status === "pending";
-        return (
-          '<div class="list-row">' +
-          '<div class="grow">' +
-          '<h4>' + HPLZ.esc(app.name) +
-            ' <span class="role-badge ' + (isPending ? "visitor" : (app.status === "approved" ? "member" : "")) + '">' +
-            (statusLabel[app.status] || app.status) + "</span></h4>" +
-          '<p class="sub">联系：' + HPLZ.esc(app.contact) + ' · ' + (app.created_at || "").slice(0, 10) + "</p>" +
-          (app.wish ? '<p class="sub">希望：' + HPLZ.esc(app.wish) + "</p>" : "") +
+  /* ===== 退出登录 ===== */
+  function bindLogout() {
+    const btn = $("#dash-logout");
+    if (btn) btn.addEventListener("click", HPLZ.logout);
+  }
+
+  /* ops-btn 样式 */
+  const _sty = document.createElement("style");
+  _sty.textContent =
+    ".ops-btn{font-size:11.5px;border:1.5px solid var(--ink);background:var(--paper);border-radius:5px;" +
+    "padding:3px 9px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s ease;}" +
+    ".ops-btn:hover{background:var(--tape);transform:translateY(-1px);}" +
+    ".ops-btn.danger:hover{background:var(--rec);color:#fff;}" +
+    ".ops-btn:disabled{opacity:.4;pointer-events:none;}";
+  document.head.appendChild(_sty);
+
+  /* ===== 启动 ===== */
+  init();
+})();
+         (app.wish ? '<p class="sub">希望：' + HPLZ.esc(app.wish) + "</p>" : "") +
           (app.strengths ? '<p class="sub">擅长：' + HPLZ.esc(app.strengths) + "</p>" : "") +
           (app.message ? '<p class="sub">Ta说：' + HPLZ.esc(app.message) + "</p>" : "") +
           "</div>" +
