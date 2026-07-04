@@ -382,9 +382,9 @@
       /* 登录面板 */
       '    <div class="auth-modal-panel on" id="mpanel-login" role="tabpanel">' +
       '      <form id="mlogin-form" novalidate>' +
-      '        <div class="field" id="mlf-username"><label for="ml-username">账号</label>' +
-      '          <input type="text" id="ml-username" autocomplete="username" maxlength="20" placeholder="你的账号">' +
-      '          <span class="err">请填写账号</span></div>' +
+      '        <div class="field" id="mlf-username"><label for="ml-username">账号或邮箱</label>' +
+      '          <input type="text" id="ml-username" autocomplete="username email" maxlength="120" placeholder="账号名 或 邮箱地址">' +
+      '          <span class="err">请填写账号或邮箱</span></div>' +
       '        <div class="field" id="mlf-password"><label for="ml-password">密码</label>' +
       '          <input type="password" id="ml-password" autocomplete="current-password" maxlength="64" placeholder="你的密码">' +
       '          <span class="err">请填写密码</span></div>' +

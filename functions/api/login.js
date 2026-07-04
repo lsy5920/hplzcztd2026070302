@@ -1,4 +1,4 @@
-/* POST /api/login — 登录 */
+/* POST /api/login — 支持账号名 或 邮箱 登录 */
 import {
   fail, getDB, DB_MISSING_MSG, sb,
   hashPassword, safeEqual, createSession, sessionCookie,
@@ -12,20 +12,38 @@ export async function onRequestPost({ request, env }) {
   const body = await readBody(request);
   if (!body) return fail("请求格式有误，请刷新页面后重试");
 
-  const username = trimStr(body.username, 20);
-  const password = body.password;
-  if (!username || !password) return fail("请填写账号和密码");
+  const identifier = trimStr(body.username || body.identifier || "", 120); // 账号名或邮箱
+  const password   = body.password;
+  if (!identifier || !password) return fail("请填写账号/邮箱和密码");
 
   try {
-    const user = await sb.first(db, "users", { username });
-    if (!user) return fail("账号或密码不对，再想想？", 401);
+    // 先按账号名查，再按邮箱查
+    let user = await sb.first(db, "users", { username: identifier });
+    if (!user && identifier.includes("@")) {
+      // 包含 @ 时也尝试按邮箱查
+      const allUsers = await sb.all(db, "users");
+      user = allUsers.find(function (u) {
+        return u.email && u.email.toLowerCase() === identifier.toLowerCase();
+      }) || null;
+    }
+
+    // 账号不存在与密码错误统一提示，避免信息泄露
+    if (!user) return fail("账号/邮箱或密码不对，再想想？", 401);
 
     const { hash } = await hashPassword(password, user.salt);
-    if (!safeEqual(hash, user.password_hash)) return fail("账号或密码不对，再想想？", 401);
+    if (!safeEqual(hash, user.password_hash)) {
+      return fail("账号/邮箱或密码不对，再想想？", 401);
+    }
 
     const session = await createSession(db, user.id);
     return new Response(
-      JSON.stringify({ ok: true, user: { id: user.id, username: user.username, display_name: user.display_name, role: user.role } }),
+      JSON.stringify({
+        ok: true,
+        user: {
+          id: user.id, username: user.username,
+          display_name: user.display_name, role: user.role,
+        },
+      }),
       {
         status: 200,
         headers: {

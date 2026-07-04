@@ -485,7 +485,7 @@ body.menu-open .nav-drawer { display: block; animation: drawerin .35s var(--ease
 }
 .field > label .tip { font-family: var(--f-hand); font-weight: 400; color: var(--ink-faint); font-size: 13.5px; }
 .field input[type="text"], .field input[type="password"],
-.field input[type="number"], .field textarea, .field select {
+.field input[type="email"], .field input[type="number"], .field textarea, .field select {
   width: 100%;
   border: 2px solid var(--ink);
   border-radius: 6px;
