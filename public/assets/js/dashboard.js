@@ -331,6 +331,98 @@
   }
 
   /* ========== 主理人：角色卡审核 ========== */
+  /* ========== 角色卡详情弹窗 ========== */
+  function openAppModal(app) {
+    var sl = { pending: "审核中", approved: "已通过", rejected: "已婉拒" };
+    var dotClass = app.status === "approved" ? "approved" : app.status === "rejected" ? "rejected" : "pending";
+    var ip = app.status === "pending";
+
+    /* 信息行辅助 */
+    function row(label, val) {
+      if (!val) return "";
+      return '<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);">' +
+        '<span style="flex:0 0 90px;font-size:13px;color:var(--ink-faint);font-weight:700;">' + label + "</span>" +
+        '<span style="flex:1;font-size:14.5px;line-height:1.7;word-break:break-word;">' + HPLZ.esc(val) + "</span></div>";
+    }
+
+    var ov = document.createElement("div");
+    ov.className = "auth-overlay open";
+    ov.setAttribute("role", "dialog");
+    ov.setAttribute("aria-modal", "true");
+    ov.innerHTML =
+      '<div class="auth-modal" style="max-width:540px;">' +
+      /* 场记板顶条 */
+      '<div class="auth-modal-head">' +
+        '<div style="display:flex;align-items:center;gap:12px;">' +
+          '<span class="app-status-dot ' + dotClass + '" style="width:12px;height:12px;flex-shrink:0;"></span>' +
+          '<h2 class="huazi" style="font-size:18px;">' + HPLZ.esc(app.name) + '</h2>' +
+          '<span class="role-badge ' + (ip ? "visitor" : app.status === "approved" ? "member" : "") + '" style="font-size:11px;">' + (sl[app.status] || app.status) + "</span>" +
+        "</div>" +
+        '<button class="auth-modal-close" id="app-modal-close" aria-label="关闭">✕</button>' +
+      "</div>" +
+      /* 正文 */
+      '<div class="auth-modal-body" style="padding-top:8px;">' +
+        /* 基本信息卡片 */
+        '<div style="background:var(--paper-3);border-radius:8px;padding:4px 16px;margin-bottom:16px;">' +
+          row("联系方式", app.contact) +
+          row("出生年份", app.birth_year ? app.birth_year + " 年" : null) +
+          row("提交时间", (app.created_at || "").slice(0, 10)) +
+        "</div>" +
+        /* 角色卡详情 */
+        '<div style="background:var(--paper-2);border:1.5px solid var(--line);border-radius:8px;padding:4px 16px;margin-bottom:16px;">' +
+          row("希望获得", app.wish) +
+          row("出镜程度", app.on_camera) +
+          row("擅长的事", app.strengths) +
+          row("不擅长/不愿", app.weakness) +
+          row("周日限制", app.sunday_limit) +
+          row("12 周目标", app.goal) +
+          row("对团队说", app.message) +
+        "</div>" +
+        /* 驳回备注区（仅 pending 时显示） */
+        (ip
+          ? '<div style="margin-bottom:12px;">' +
+            '<label style="font-size:13px;font-weight:700;display:block;margin-bottom:6px;">驳回备注 <span style="color:var(--ink-faint);font-weight:400;">（选填，婉拒时发邮件给对方）</span></label>' +
+            '<input type="text" id="app-modal-note" maxlength="200" placeholder="可以给对方一些具体建议……" ' +
+              'style="width:100%;border:2px solid var(--ink);border-radius:6px;padding:10px 12px;font-family:inherit;font-size:14px;">' +
+            "</div>" +
+            '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+              '<button class="btn primary" id="app-modal-approve" data-appid="' + app.id + '">✓ 通过角色卡</button>' +
+              '<button class="btn ghost" id="app-modal-reject" data-appid="' + app.id + '">婉拒</button>' +
+            "</div>"
+          : (app.reject_note
+              ? '<div class="pin-note" style="transform:none;">主理人反馈：' + HPLZ.esc(app.reject_note) + "</div>"
+              : "")) +
+      "</div></div>";
+
+    document.body.appendChild(ov);
+    document.body.classList.add("auth-open");
+
+    var close = function () { ov.remove(); document.body.classList.remove("auth-open"); };
+    ov.querySelector("#app-modal-close").addEventListener("click", close);
+    ov.addEventListener("click", function (e) { if (e.target === ov) close(); });
+    document.addEventListener("keydown", function esc(e) {
+      if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
+    });
+
+    if (!ip) return;
+
+    /* 审核按钮 */
+    async function doReview(action) {
+      var note = (ov.querySelector("#app-modal-note") && ov.querySelector("#app-modal-note").value.trim()) || "";
+      var ab = ov.querySelector("#app-modal-approve"), rb = ov.querySelector("#app-modal-reject");
+      if (ab) ab.disabled = true; if (rb) rb.disabled = true;
+      try {
+        var res = await HPLZ.api("/api/applications/review", { method: "POST", body: { id: app.id, action: action, reject_note: note } });
+        HPLZ.toast(res.message, "ok"); close(); loadApplications();
+      } catch (err) {
+        HPLZ.toast(err.message, "err");
+        if (ab) ab.disabled = false; if (rb) rb.disabled = false;
+      }
+    }
+    ov.querySelector("#app-modal-approve").addEventListener("click", function () { doReview("approve"); });
+    ov.querySelector("#app-modal-reject").addEventListener("click", function () { doReview("reject"); });
+  }
+
   async function loadApplications() {
     var wrap = $("#applications-list"); if (!wrap) return;
     try {
@@ -340,33 +432,30 @@
       var sl = { pending: "审核中", approved: "已通过", rejected: "已婉拒" };
       wrap.innerHTML = apps.map(function (app) {
         var ip = app.status === "pending";
-        return '<div class="list-row"><div class="grow">' +
-          '<h4>' + HPLZ.esc(app.name) + ' <span class="role-badge ' + (ip ? "visitor" : app.status === "approved" ? "member" : "") + '">' + (sl[app.status] || app.status) + "</span></h4>" +
-          '<p class="sub">联系：' + HPLZ.esc(app.contact) + " · " + (app.created_at || "").slice(0, 10) + "</p>" +
-          (app.wish ? '<p class="sub">希望：' + HPLZ.esc(app.wish) + "</p>" : "") +
-          (app.strengths ? '<p class="sub">擅长：' + HPLZ.esc(app.strengths) + "</p>" : "") +
-          (app.message ? '<p class="sub">Ta 说：' + HPLZ.esc(app.message) + "</p>" : "") + "</div>" +
-          (ip ? '<div class="ops" style="flex-direction:column;gap:8px;">' +
-            '<div style="display:flex;gap:8px;">' +
-              '<button class="btn sm primary" data-appid="' + app.id + '" data-action="approve">通过</button>' +
-              '<button class="btn sm ghost" data-appid="' + app.id + '" data-action="reject">婉拒</button>' +
-            "</div>" +
-            '<input type="text" class="rn-input" data-appid="' + app.id + '" maxlength="200" placeholder="驳回备注（选填，会发邮件）" ' +
-              'style="border:1.5px solid var(--line);border-radius:6px;padding:8px 10px;font-family:inherit;font-size:13.5px;width:100%;max-width:300px;">' +
-            "</div>" : "") + "</div>";
+        var dotClass = app.status === "approved" ? "approved" : app.status === "rejected" ? "rejected" : "pending";
+        return (
+          '<div class="list-row" style="cursor:pointer;transition:background .2s ease;" data-appcard="' + app.id + '">' +
+          '<div style="display:flex;align-items:center;gap:10px;flex:1 1 0;min-width:0;">' +
+            '<span class="app-status-dot ' + dotClass + '"></span>' +
+            '<div style="flex:1;min-width:0;">' +
+              '<h4 style="margin:0 0 3px;">' + HPLZ.esc(app.name) + ' <span class="role-badge ' + (ip ? "visitor" : app.status === "approved" ? "member" : "") + '">' + (sl[app.status] || app.status) + '</span></h4>' +
+              '<p class="sub" style="margin:0;">' + HPLZ.esc(app.contact) + ' · ' + (app.created_at || "").slice(0, 10) + (app.wish ? ' · ' + HPLZ.esc(app.wish) : "") + '</p>' +
+            '</div>' +
+          '</div>' +
+          '<span style="color:var(--ink-faint);font-size:13px;padding-left:8px;flex-shrink:0;">查看详情 →</span>' +
+          '</div>'
+        );
       }).join("");
-      wrap.querySelectorAll("[data-action]").forEach(function (btn) {
-        btn.addEventListener("click", async function () {
-          var id = parseInt(btn.dataset.appid, 10), action = btn.dataset.action;
-          var ni = wrap.querySelector('.rn-input[data-appid="' + id + '"]');
-          btn.disabled = true;
-          try {
-            var res = await HPLZ.api("/api/applications/review", { method: "POST", body: { id: id, action: action, reject_note: ni ? ni.value.trim() : "" } });
-            HPLZ.toast(res.message, "ok"); loadApplications();
-          } catch (err) { HPLZ.toast(err.message, "err"); btn.disabled = false; }
-        });
+      /* 点击卡片打开弹窗 */
+      wrap.querySelectorAll("[data-appcard]").forEach(function (row) {
+        var appId = parseInt(row.dataset.appcard, 10);
+        var app   = apps.find(function (a) { return a.id === appId; });
+        if (!app) return;
+        row.addEventListener("mouseenter", function () { row.style.background = "var(--tape-soft)"; });
+        row.addEventListener("mouseleave", function () { row.style.background = ""; });
+        row.addEventListener("click", function () { openAppModal(app); });
       });
-    } catch (err) { wrap.innerHTML = '<div class="empty">' + HPLZ.esc(err.message) + "</div>"; }
+    } catch (err) { wrap.innerHTML = '<div class="empty">' + HPLZ.esc(err.message) + '</div>'; }
   }
 
   /* ========== 主理人：成员管理 ========== */
