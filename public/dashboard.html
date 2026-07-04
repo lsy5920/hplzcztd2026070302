@@ -54,23 +54,14 @@
 
       <div class="container">
 
-        <!-- ===== 我的申请状态 ===== -->
+        <!-- ===== 我的角色卡（状态 + 资料 + 可编辑） ===== -->
         <section class="section" style="padding-top:20px;" id="my-app-section">
           <div class="section-head">
-            <span class="scene-tag">MY STATUS · 申请状态</span>
-            <h2 class="huazi">我的<span class="hl">入队申请</span></h2>
+            <span class="scene-tag">MY CARD · 我的角色卡</span>
+            <h2 class="huazi">我的<span class="rd">角色卡</span></h2>
+            <p class="hand">—— 角色卡是你在剧组的名片，申请时填写，入组后随时可以更新。</p>
           </div>
           <div id="my-app-content"><!-- 由 dashboard.js 渲染 --></div>
-        </section>
-
-        <!-- ===== 我的名片 ===== -->
-        <section class="section">
-          <div class="section-head">
-            <span class="scene-tag">PROFILE · 我的名片</span>
-            <h2 class="huazi">编辑<span class="rd">我的信息</span></h2>
-            <p class="hand">—— 修改昵称、职位和邮箱。职位由主理人或自己设定，展示在剧组名片墙。</p>
-          </div>
-          <div class="tape-card no-tape" id="my-profile-card"><!-- 由 dashboard.js 渲染 --></div>
         </section>
 
         <!-- ===== 今日任务卡 ===== -->
@@ -83,12 +74,12 @@
           <div class="tape-card" id="today-card"></div>
         </section>
 
-        <!-- ===== 剧组名片墙 ===== -->
+        <!-- ===== 剧组角色卡 ===== -->
         <section class="section">
           <div class="section-head">
-            <span class="scene-tag">CREW · 剧组名片墙</span>
-            <h2 class="huazi">全组<span class="hl">成员名片</span></h2>
-            <p class="hand">—— 已通过审核的成员展示在这里，每人都可以查看和编辑自己的名片。</p>
+            <span class="scene-tag">CREW · 剧组角色卡</span>
+            <h2 class="huazi">全组<span class="hl">角色卡</span></h2>
+            <p class="hand">—— 已通过审核的成员展示在这里，每人都可以查看和编辑自己的角色卡。</p>
           </div>
           <div class="crew-grid" id="crew-cards"><!-- 由 dashboard.js 渲染 --></div>
         </section>
@@ -119,11 +110,11 @@
           <p class="hand" id="board-role-tip" style="margin-top:16px;"></p>
         </section>
 
-        <!-- ===== 主理人：入队申请审核 ===== -->
+        <!-- ===== 主理人：角色卡审核 ===== -->
         <section class="section admin-only" style="display:none;">
           <div class="section-head">
-            <span class="scene-tag">ADMIN · 入队申请</span>
-            <h2 class="huazi">谁想<span class="hl">进组</span></h2>
+            <span class="scene-tag">ADMIN · 角色卡审核</span>
+            <h2 class="huazi">谁想<span class="hl">加入剧组</span></h2>
             <p class="hand">—— 只有你看得到。通过后请用对方留的联系方式主动联系，审核结果会自动发邮件通知。</p>
           </div>
           <div id="applications-list"><div class="empty">加载中……</div></div>
