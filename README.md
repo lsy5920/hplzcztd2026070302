@@ -232,19 +232,19 @@ hplzcztd2026070302/          ← 仓库根目录(本文件夹整个上传 GitHub
 
 **Q：注册时提示「数据库尚未配置」或「DB」相关错误**
 
-A：说明 D1 数据库还没绑定。按部署教程第 3-4 步操作，在 Cloudflare Pages 的「Settings → Functions → D1 database bindings」添加绑定，变量名填 `DB`，然后重新部署一次。
+A：说明 Supabase 环境变量还没配置到 Cloudflare Pages。按部署教程第 4 步，在 Pages「Settings → Environment variables」里添加 `SUPABASE_URL` 和 `SUPABASE_KEY`，然后重新部署一次。
 
 ---
 
-**Q：注册提示「数据库表尚未初始化」**
+**Q：注册提示「数据库表不存在」或 Supabase 查询报错**
 
-A：数据库已绑定但还没建表。回到 Cloudflare D1 控制台，找到 `hplz-db`，在「Console」标签页粘贴并执行 `schema.sql` 全部内容。
+A：Supabase 数据库里的表还没创建。回到 Supabase 控制台 → SQL Editor → 新建查询，把项目根目录的 `schema_supabase.sql` 全部内容粘贴进去，点 Run 执行。左侧 Table Editor 出现 users / sessions / applications / ideas 四张表即成功。
 
 ---
 
 **Q：注册/登录成功但刷新后又变成未登录**
 
-A：Cookie 设置了 `Secure` 标志，必须在 HTTPS 下才有效。直接在 `https://xxx.pages.dev` 上访问即可，不要用 `http://`。本地用 `wrangler pages dev` 调试时 Cookie 也正常生效。
+A：Cookie 设置了 `Secure` 标志，必须在 HTTPS 下才有效。直接在 `https://xxx.pages.dev` 上访问即可，不要用 `http://`。
 
 ---
 
@@ -256,17 +256,17 @@ A：目录由 `manual.js` 从页面 `section[data-toc]` 元素自动收集生成
 
 **Q：灵感卡投进去了，但看板上没出现**
 
-A：看板会在页面加载时请求一次数据，投完后需要手动刷新页面（或后续版本可加实时刷新）。
+A：看板会在页面加载时请求一次数据，投完后需要手动刷新页面。
 
 ---
 
 **Q：GitHub push 时提示需要 Personal Access Token**
 
-A：在 GitHub → 右上角头像 → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token，勾选 `repo` 权限，生成后复制备用。Push 时密码栏粘贴这个 token 即可。
+A：在 GitHub → 头像 → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token，勾选 `repo` 权限，生成后复制。Push 时密码栏粘贴这个 token 即可。
 
 ---
 
-**Q：本地想用 wrangler 调试，命令是什么**
+**Q：本地想调试，命令是什么**
 
 A：先安装 wrangler（只需一次）：
 
@@ -274,19 +274,20 @@ A：先安装 wrangler（只需一次）：
 npm install -g wrangler@3
 ```
 
-然后在项目根目录运行：
+然后在项目根目录新建 `.dev.vars` 文件，写入两行：
 
-```cmd
-npx wrangler pages dev public --d1 DB
+```
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_KEY=你的service_role_key
 ```
 
-首次运行会自动创建本地 SQLite 数据库。再另开一个命令行窗口，执行建表语句：
+再运行：
 
 ```cmd
-npx wrangler d1 execute hplz-db --local --file=./schema.sql
+npx wrangler pages dev public
 ```
 
-浏览器打开 `http://localhost:8788` 即可本地完整测试。
+浏览器打开 `http://localhost:8788` 即可本地完整测试（连接的是真实 Supabase 数据库）。
 
 ---
 
@@ -329,4 +330,14 @@ npx wrangler d1 execute hplz-db --local --file=./schema.sql
   - 根本原因:wrangler.toml 含 pages_build_output_dir 会禁用控制台绑定 UI
   - 修复方案:将 wrangler.toml 加入 .gitignore,不再上传 GitHub
   - 操作步骤:见下方「重新部署步骤」
+
+2026-07-04 10:00 【优化】数据库切换为 Supabase(PostgreSQL),彻底告别 D1 配置烦恼
+  - 删除全部 Cloudflare D1 依赖(schema.sql/wrangler.toml D1 节/D1 绑定)
+  - 新增 schema_supabase.sql:在 Supabase SQL Editor 一键建四张表
+  - 全量重写 functions/api/_utils.js:基于 fetch 的 Supabase REST API 客户端
+  - 全量重写 13 个 Functions 接口文件:register/login/logout/me/apply/
+    applications/review/ideas/[id]/members/role
+  - 部署方式:Cloudflare Pages 环境变量填入 SUPABASE_URL + SUPABASE_KEY
+  - 本地调试:项目根目录创建 .dev.vars 文件填入两个变量即可
+  - 数据安全:service_role key 仅存服务端环境变量,不入代码仓库
 ```

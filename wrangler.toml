@@ -13,4 +13,4 @@ compatibility_flags = ["nodejs_compat"]
 # SUPABASE_KEYSUPABASE_KEY 为敏感密钥，请在 Cloudflare Pages 控制台
 # 「设置 → 环境变量」中以 Secret 形式添加，不要写入本文件
 [vars]
-SUPABASE_URL = ""   # 部署前填入你的 Supabase 项目 URL，例如 https://xxxx.supabase.co
+SUPABASE_URL = "https://fimnfixwnzqhudmydcyq.supabase.co"   # 部署前填入你的 Supabase 项目 URL，例如 https://xxxx.supabase.co
