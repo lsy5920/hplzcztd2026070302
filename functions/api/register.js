@@ -4,9 +4,10 @@
          之后注册的用户默认为访客(visitor)
    ============================================================ */
 import {
-  fail, getDB, DB_MISSING_MSG, TABLE_MISSING_MSG, isNoTableError,
+  fail, getDB, DB_MISSING_MSG,
   hashPassword, createSession, sessionCookie,
   trimStr, isValidUsername, isValidPassword, readBody,
+  ensureTables,
 } from "./_utils.js";
 
 export async function onRequestPost({ request, env }) {
@@ -20,25 +21,20 @@ export async function onRequestPost({ request, env }) {
   const displayName = trimStr(body.display_name, 20) || username;
   const password = body.password;
 
-  if (!isValidUsername(username)) {
-    return fail("账号需为 3-20 位字母、数字或下划线");
-  }
-  if (!isValidPassword(password)) {
-    return fail("密码长度需在 6-64 位之间");
-  }
-  if (displayName.length < 1) {
-    return fail("昵称不能为空");
-  }
+  if (!isValidUsername(username)) return fail("账号需为 3-20 位字母、数字或下划线");
+  if (!isValidPassword(password)) return fail("密码长度需在 6-64 位之间");
+  if (displayName.length < 1) return fail("昵称不能为空");
 
   try {
-    // 账号查重
+    // 首次请求自动建表(幂等,不影响已有数据)
+    await ensureTables(db);
+
     const exists = await db
       .prepare("SELECT id FROM users WHERE username = ?")
       .bind(username)
       .first();
     if (exists) return fail("这个账号已经被注册了,换一个试试");
 
-    // 第一个注册用户自动成为主理人
     const countRow = await db.prepare("SELECT COUNT(*) AS n FROM users").first();
     const role = countRow && countRow.n === 0 ? "admin" : "visitor";
 
@@ -53,7 +49,6 @@ export async function onRequestPost({ request, env }) {
     const userId = result.meta.last_row_id;
     const session = await createSession(db, userId);
 
-    // 注册成功后直接种下会话 Cookie(免二次登录)
     return new Response(
       JSON.stringify({
         ok: true,
@@ -70,9 +65,6 @@ export async function onRequestPost({ request, env }) {
       }
     );
   } catch (err) {
-    // 临时调试:把原始错误信息也返回,方便定位缺失的表
-    const raw = err && err.message ? err.message : String(err);
-    if (isNoTableError(err)) return fail("表缺失[" + raw + "] — " + TABLE_MISSING_MSG, 503);
-    return fail("注册失败:" + raw, 500);
+    return fail("注册失败:" + (err && err.message ? err.message : String(err)), 500);
   }
 }

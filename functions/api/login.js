@@ -2,9 +2,9 @@
    接口:POST /api/login — 登录
    ============================================================ */
 import {
-  fail, getDB, DB_MISSING_MSG, TABLE_MISSING_MSG, isNoTableError,
+  fail, getDB, DB_MISSING_MSG,
   hashPassword, safeEqual, createSession, sessionCookie,
-  trimStr, readBody,
+  trimStr, readBody, ensureTables,
 } from "./_utils.js";
 
 export async function onRequestPost({ request, env }) {
@@ -19,6 +19,9 @@ export async function onRequestPost({ request, env }) {
   if (!username || !password) return fail("请填写账号和密码");
 
   try {
+    // 首次请求自动建表(幂等)
+    await ensureTables(db);
+
     const user = await db
       .prepare(
         "SELECT id, username, display_name, password_hash, salt, role FROM users WHERE username = ?"
@@ -26,7 +29,6 @@ export async function onRequestPost({ request, env }) {
       .bind(username)
       .first();
 
-    // 账号不存在与密码错误统一提示,避免撞库探测
     if (!user) return fail("账号或密码不对,再想想?", 401);
 
     const { hash } = await hashPassword(password, user.salt);
@@ -55,7 +57,6 @@ export async function onRequestPost({ request, env }) {
       }
     );
   } catch (err) {
-    if (isNoTableError(err)) return fail(TABLE_MISSING_MSG, 503);
-    return fail("登录失败:" + (err.message || "服务器开小差了"), 500);
+    return fail("登录失败:" + (err && err.message ? err.message : String(err)), 500);
   }
 }
