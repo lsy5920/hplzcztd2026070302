@@ -201,3 +201,138 @@ export function isValidPassword(p) { return typeof p === "string" && p.length >=
 export async function readBody(req) {
   try { return await req.json(); } catch (_) { return null; }
 }
+
+/* ---------- 邮件发送(Resend API，零依赖 fetch) ----------
+   env.RESEND_KEY  = Resend API 密钥(在 CF Pages 环境变量里配置)
+   env.EMAIL_FROM  = 发件人地址，例如 noreply@hplz.lsy20.top(需在 Resend 验证域名)
+   失败时只打印日志，不影响主流程 */
+export async function sendEmail(env, { to, subject, html }) {
+  const key  = env && env.RESEND_KEY;
+  const from = (env && env.EMAIL_FROM) || "胡拍乱造创作组 <noreply@hplz.lsy20.top>";
+  if (!key || !to) return; // 未配置或无收件人则跳过
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to, subject, html }),
+    });
+  } catch (_) { /* 邮件失败不中断主流程 */ }
+}
+
+/* ---------- 美观 HTML 邮件模板 ---------- */
+export function emailApproved(displayName) {
+  return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>申请通过通知</title></head>
+<body style="margin:0;padding:0;background:#F0EBE0;font-family:'PingFang SC','Microsoft YaHei',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F0EBE0;padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+  <!-- 场记板顶部 -->
+  <tr><td style="background:#191F24;border-radius:10px 10px 0 0;padding:0;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="padding:14px 24px 0;">
+          <div style="background:repeating-linear-gradient(-45deg,#191F24 0 14px,#FFC529 14px 28px);height:14px;border-radius:4px 4px 0 0;"></div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:16px 28px 20px;">
+          <span style="font-family:monospace;font-size:11px;letter-spacing:3px;color:#9AA3AA;">SCENE 00 · NOTIFICATION</span><br>
+          <span style="font-size:22px;font-weight:900;color:#F7F3EA;letter-spacing:2px;">胡拍乱造创作组</span>
+        </td>
+        <td align="right" style="padding-right:28px;">
+          <span style="display:inline-block;background:#2FA24F;color:#fff;border:2px solid #2FA24F;border-radius:6px;padding:6px 18px;font-weight:900;font-size:15px;letter-spacing:2px;transform:rotate(-4deg);">通过</span>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+  <!-- 正文 -->
+  <tr><td style="background:#FFFDF7;padding:36px 36px 28px;border:2px solid #191F24;border-top:none;">
+    <p style="margin:0 0 8px;font-size:24px;font-weight:900;color:#191F24;">嘿，${escHtml(displayName)}！</p>
+    <p style="margin:0 0 22px;font-size:16px;color:#57616A;line-height:1.8;">
+      你的入队申请已经通过审核了。<br>
+      主理人会通过你留下的联系方式主动找你，开机见！
+    </p>
+    <div style="background:#FFF9E8;border:2px dashed #FFC529;border-radius:8px;padding:18px 22px;margin-bottom:24px;">
+      <p style="margin:0;font-size:14px;color:#191F24;line-height:1.8;">
+        🎬 <strong>接下来做什么</strong><br>
+        登录网站 → 进入成员空间 → 看看本周的任务卡<br>
+        完善你的职位身份，把自己的想法投进灵感池。
+      </p>
+    </div>
+    <p style="margin:0;font-size:13px;color:#9AA3AA;">
+      把脑洞拍出来，把日子造有趣。<br>
+      —— 胡拍乱造创作组
+    </p>
+  </td></tr>
+  <!-- 底部 -->
+  <tr><td style="background:#191F24;border-radius:0 0 10px 10px;padding:16px 28px;text-align:center;">
+    <span style="font-family:monospace;font-size:11px;letter-spacing:2px;color:#57616A;">
+      胡拍乱造创作组 · 兴趣优先 · 学习驱动 · 稳定共创
+    </span>
+  </td></tr>
+</table></td></tr></table>
+</body></html>`;
+}
+
+export function emailRejected(displayName, rejectNote) {
+  const note = rejectNote
+    ? `<div style="background:#FFF0EE;border:2px dashed #FF4021;border-radius:8px;padding:16px 20px;margin:18px 0;">
+        <p style="margin:0;font-size:14px;color:#191F24;line-height:1.8;"><strong>主理人的反馈：</strong><br>${escHtml(rejectNote)}</p>
+       </div>`
+    : "";
+  return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>申请审核通知</title></head>
+<body style="margin:0;padding:0;background:#F0EBE0;font-family:'PingFang SC','Microsoft YaHei',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F0EBE0;padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+  <tr><td style="background:#191F24;border-radius:10px 10px 0 0;padding:0;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td style="padding:14px 24px 0;">
+        <div style="background:repeating-linear-gradient(-45deg,#191F24 0 14px,#FFC529 14px 28px);height:14px;border-radius:4px 4px 0 0;"></div>
+      </td></tr>
+      <tr>
+        <td style="padding:16px 28px 20px;">
+          <span style="font-family:monospace;font-size:11px;letter-spacing:3px;color:#9AA3AA;">SCENE 00 · NOTIFICATION</span><br>
+          <span style="font-size:22px;font-weight:900;color:#F7F3EA;letter-spacing:2px;">胡拍乱造创作组</span>
+        </td>
+        <td align="right" style="padding-right:28px;">
+          <span style="display:inline-block;background:#FF4021;color:#fff;border:2px solid #FF4021;border-radius:6px;padding:6px 14px;font-weight:900;font-size:15px;letter-spacing:2px;transform:rotate(-4deg);">暂未通过</span>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+  <tr><td style="background:#FFFDF7;padding:36px 36px 28px;border:2px solid #191F24;border-top:none;">
+    <p style="margin:0 0 8px;font-size:24px;font-weight:900;color:#191F24;">嘿，${escHtml(displayName)}！</p>
+    <p style="margin:0 0 4px;font-size:16px;color:#57616A;line-height:1.8;">
+      你的入队申请这次暂未通过，感谢你愿意加入。
+    </p>
+    ${note}
+    <div style="background:#F0EBE0;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+      <p style="margin:0;font-size:14px;color:#191F24;line-height:1.8;">
+        💡 <strong>你可以修改申请再次提交</strong><br>
+        登录网站 → 成员空间 → 查看申请状态 → 修改后重新提交。
+      </p>
+    </div>
+    <p style="margin:0;font-size:13px;color:#9AA3AA;">
+      把脑洞拍出来，把日子造有趣。<br>
+      —— 胡拍乱造创作组
+    </p>
+  </td></tr>
+  <tr><td style="background:#191F24;border-radius:0 0 10px 10px;padding:16px 28px;text-align:center;">
+    <span style="font-family:monospace;font-size:11px;letter-spacing:2px;color:#57616A;">
+      胡拍乱造创作组 · 兴趣优先 · 学习驱动 · 稳定共创
+    </span>
+  </td></tr>
+</table></td></tr></table>
+</body></html>`;
+}
+
+/* HTML 转义(防止邮件注入) */
+function escHtml(s) {
+  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}

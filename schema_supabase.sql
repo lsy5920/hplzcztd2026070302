@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   salt          TEXT NOT NULL,
   role          TEXT NOT NULL DEFAULT 'visitor',
+  email         TEXT NOT NULL DEFAULT '',
+  job_title     TEXT NOT NULL DEFAULT '',
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -27,6 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 -- ---------- 入队申请表 ----------
 CREATE TABLE IF NOT EXISTS applications (
   id           BIGSERIAL PRIMARY KEY,
+  user_id      BIGINT REFERENCES users(id) ON DELETE SET NULL,
   name         TEXT NOT NULL,
   contact      TEXT NOT NULL,
   wish         TEXT NOT NULL DEFAULT '',
@@ -39,9 +42,11 @@ CREATE TABLE IF NOT EXISTS applications (
   status       TEXT NOT NULL DEFAULT 'pending',
   reviewed_by  BIGINT,
   reviewed_at  TIMESTAMPTZ,
+  reject_note  TEXT NOT NULL DEFAULT '',
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_apps_status ON applications(status);
+CREATE INDEX IF NOT EXISTS idx_applications_user ON applications(user_id);
 
 -- ---------- 灵感卡表 ----------
 CREATE TABLE IF NOT EXISTS ideas (

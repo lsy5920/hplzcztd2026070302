@@ -190,9 +190,17 @@
         if (btn) btn.addEventListener("click", HPLZ.logout);
       }
     } else {
-      desk.innerHTML = '<a class="btn sm" href="login.html">登录 / 注册</a>';
+      desk.innerHTML = '<button class="btn sm" id="nav-login-btn">登录 / 注册</button>';
+      const nb = $("#nav-login-btn");
+      if (nb) nb.addEventListener("click", function () { HPLZ.openLoginModal(); });
       if (drawer) {
-        drawer.innerHTML = '<a class="btn primary" href="login.html">登录 / 注册</a>';
+        drawer.innerHTML = '<button class="btn primary" id="drawer-login-btn" style="width:100%;">登录 / 注册</button>';
+        const db2 = $("#drawer-login-btn");
+        if (db2) db2.addEventListener("click", function () {
+          document.body.classList.remove("menu-open");
+          document.documentElement.style.overflow = "";
+          HPLZ.openLoginModal();
+        });
       }
     }
   }
@@ -215,7 +223,7 @@
       "      <h4>SCENE INDEX / 页面</h4>" +
       "      <ul>" +
       NAV_ITEMS.map(function (i) { return '<li><a href="' + i.href + '">' + i.text + "</a></li>"; }).join("") +
-      '        <li><a href="login.html">登录 / 注册</a></li>' +
+      '        <li><a href="#" onclick="HPLZ.openLoginModal();return false;">登录 / 注册</a></li>' +
       "      </ul>" +
       "    </div>" +
       "    <div>" +
@@ -348,7 +356,178 @@
     update();
   }
 
-  /* ---------- 14. 启动 ---------- */
+  /* ---------- 15. 全局登录/注册弹窗 ---------- */
+  var _modalEl = null;
+  var _modalCallback = null;
+
+  function buildModal() {
+    if (_modalEl) return _modalEl;
+    var div = document.createElement("div");
+    div.className = "auth-overlay";
+    div.id = "auth-overlay";
+    div.setAttribute("role", "dialog");
+    div.setAttribute("aria-modal", "true");
+    div.setAttribute("aria-label", "登录或注册");
+    div.innerHTML =
+      '<div class="auth-modal">' +
+      '  <div class="auth-modal-head">' +
+      '    <h2 class="huazi">签到，进片场</h2>' +
+      '    <button class="auth-modal-close" id="auth-modal-close" aria-label="关闭">✕</button>' +
+      "  </div>" +
+      '  <div class="auth-modal-body">' +
+      '    <div class="auth-modal-tabs" role="tablist">' +
+      '      <button class="on" id="mtab-login" role="tab" aria-selected="true">登录</button>' +
+      '      <button id="mtab-register" role="tab" aria-selected="false">注册新账号</button>' +
+      "    </div>" +
+      /* 登录面板 */
+      '    <div class="auth-modal-panel on" id="mpanel-login" role="tabpanel">' +
+      '      <form id="mlogin-form" novalidate>' +
+      '        <div class="field" id="mlf-username"><label for="ml-username">账号</label>' +
+      '          <input type="text" id="ml-username" autocomplete="username" maxlength="20" placeholder="你的账号">' +
+      '          <span class="err">请填写账号</span></div>' +
+      '        <div class="field" id="mlf-password"><label for="ml-password">密码</label>' +
+      '          <input type="password" id="ml-password" autocomplete="current-password" maxlength="64" placeholder="你的密码">' +
+      '          <span class="err">请填写密码</span></div>' +
+      '        <button type="submit" class="btn primary" id="mlogin-btn" style="width:100%;margin-top:8px;">登录</button>' +
+      "      </form>" +
+      "    </div>" +
+      /* 注册面板 */
+      '    <div class="auth-modal-panel" id="mpanel-register" role="tabpanel">' +
+      '      <form id="mregister-form" novalidate>' +
+      '        <div class="field" id="mrf-username"><label for="mr-username">账号 <span class="tip">3-20位字母数字下划线</span></label>' +
+      '          <input type="text" id="mr-username" autocomplete="username" maxlength="20" placeholder="例:xiaoming_01">' +
+      '          <span class="err">账号格式不对</span></div>' +
+      '        <div class="field" id="mrf-display"><label for="mr-display">昵称</label>' +
+      '          <input type="text" id="mr-display" maxlength="20" placeholder="片场里大家怎么叫你">' +
+      '          <span class="err">昵称不能为空</span></div>' +
+      '        <div class="field"><label for="mr-email">邮箱 <span class="tip">用于接收审核通知，可以后再填</span></label>' +
+      '          <input type="email" id="mr-email" autocomplete="email" maxlength="120" placeholder="例:xiaoming@example.com"></div>' +
+      '        <div class="field" id="mrf-password"><label for="mr-password">密码 <span class="tip">至少6位</span></label>' +
+      '          <input type="password" id="mr-password" autocomplete="new-password" maxlength="64" placeholder="至少6位">' +
+      '          <span class="err">密码需6-64位</span></div>' +
+      '        <div class="field" id="mrf-password2"><label for="mr-password2">再输一遍</label>' +
+      '          <input type="password" id="mr-password2" autocomplete="new-password" maxlength="64" placeholder="两次要一致">' +
+      '          <span class="err">两次密码不一致</span></div>' +
+      '        <button type="submit" class="btn primary" id="mregister-btn" style="width:100%;margin-top:8px;">注册并进入片场</button>' +
+      "      </form>" +
+      "    </div>" +
+      "  </div>" +
+      "</div>";
+    document.body.appendChild(div);
+    _modalEl = div;
+
+    // 关闭按钮 & 点遮罩关闭
+    div.querySelector("#auth-modal-close").addEventListener("click", HPLZ.closeLoginModal);
+    div.addEventListener("click", function (e) {
+      if (e.target === div) HPLZ.closeLoginModal();
+    });
+    // Escape 关闭
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") HPLZ.closeLoginModal();
+    });
+
+    // 标签切换
+    function switchMTab(showLogin) {
+      div.querySelector("#mtab-login").classList.toggle("on", showLogin);
+      div.querySelector("#mtab-register").classList.toggle("on", !showLogin);
+      div.querySelector("#mtab-login").setAttribute("aria-selected", showLogin ? "true" : "false");
+      div.querySelector("#mtab-register").setAttribute("aria-selected", showLogin ? "false" : "true");
+      div.querySelector("#mpanel-login").classList.toggle("on", showLogin);
+      div.querySelector("#mpanel-register").classList.toggle("on", !showLogin);
+    }
+    div.querySelector("#mtab-login").addEventListener("click", function () { switchMTab(true); });
+    div.querySelector("#mtab-register").addEventListener("click", function () { switchMTab(false); });
+
+    function setMInvalid(id, invalid) {
+      var el = div.querySelector("#" + id);
+      if (el) el.classList.toggle("invalid", invalid);
+    }
+
+    // 登录表单
+    div.querySelector("#mlogin-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      var username = div.querySelector("#ml-username").value.trim();
+      var password = div.querySelector("#ml-password").value;
+      setMInvalid("mlf-username", !username);
+      setMInvalid("mlf-password", !password);
+      if (!username || !password) return;
+      var btn = div.querySelector("#mlogin-btn");
+      btn.disabled = true; btn.textContent = "登录中…";
+      try {
+        var data = await HPLZ.api("/api/login", { method: "POST", body: { username: username, password: password } });
+        meCache = data.user; meCacheAt = Date.now();
+        HPLZ.toast("欢迎回来，" + data.user.display_name + "！", "ok");
+        HPLZ.closeLoginModal();
+        renderUserArea();
+        if (_modalCallback) { _modalCallback(data.user); _modalCallback = null; }
+      } catch (err) {
+        HPLZ.toast(err.message, "err");
+        btn.disabled = false; btn.textContent = "登录";
+      }
+    });
+
+    // 注册表单
+    div.querySelector("#mregister-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      var username = div.querySelector("#mr-username").value.trim();
+      var display  = div.querySelector("#mr-display").value.trim();
+      var email    = div.querySelector("#mr-email").value.trim();
+      var pwd      = div.querySelector("#mr-password").value;
+      var pwd2     = div.querySelector("#mr-password2").value;
+      var okUser   = /^[A-Za-z0-9_]{3,20}$/.test(username);
+      var okDisp   = display.length >= 1;
+      var okPwd    = pwd.length >= 6 && pwd.length <= 64;
+      var okSame   = pwd === pwd2;
+      setMInvalid("mrf-username", !okUser);
+      setMInvalid("mrf-display", !okDisp);
+      setMInvalid("mrf-password", !okPwd);
+      setMInvalid("mrf-password2", !okSame);
+      if (!okUser || !okDisp || !okPwd || !okSame) return;
+      var btn = div.querySelector("#mregister-btn");
+      btn.disabled = true; btn.textContent = "注册中…";
+      try {
+        var data = await HPLZ.api("/api/register", {
+          method: "POST",
+          body: { username: username, display_name: display, email: email, password: pwd },
+        });
+        meCache = data.user; meCacheAt = Date.now();
+        HPLZ.toast(data.first_admin ? "注册成功！你是第一位用户，已自动成为主理人" : "注册成功，欢迎来到片场！", "ok");
+        HPLZ.closeLoginModal();
+        renderUserArea();
+        if (_modalCallback) { _modalCallback(data.user); _modalCallback = null; }
+      } catch (err) {
+        HPLZ.toast(err.message, "err");
+        btn.disabled = false; btn.textContent = "注册并进入片场";
+      }
+    });
+
+    return div;
+  }
+
+  HPLZ.openLoginModal = function (opts) {
+    var o = opts || {};
+    _modalCallback = o.onSuccess || null;
+    var overlay = buildModal();
+    // 如需直接打开注册标签
+    if (o.tab === "register") {
+      overlay.querySelector("#mtab-register") && overlay.querySelector("#mtab-register").click();
+    }
+    overlay.classList.add("open");
+    document.body.classList.add("auth-open");
+    setTimeout(function () {
+      var first = overlay.querySelector("input");
+      if (first) first.focus();
+    }, 200);
+  };
+
+  HPLZ.closeLoginModal = function () {
+    if (!_modalEl) return;
+    _modalEl.classList.remove("open");
+    document.body.classList.remove("auth-open");
+    _modalCallback = null;
+  };
+
+  /* ---------- 16. 启动 ---------- */
   document.addEventListener("DOMContentLoaded", function () {
     renderNav();
     renderFooter();

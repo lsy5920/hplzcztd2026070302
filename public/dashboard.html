@@ -4,61 +4,112 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>成员空间 · 胡拍乱造创作组</title>
-  <meta name="description" content="胡拍乱造成员空间:今日任务、灵感池看板、入队申请审核与成员管理。">
+  <meta name="description" content="胡拍乱造成员空间：今日任务、我的申请状态、名片管理、灵感池看板。">
   <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
   <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    /* 名片编辑内联表单 */
+    .card-edit-form { display:none; margin-top:18px; padding-top:18px; border-top:1.5px dashed var(--line); }
+    .card-edit-form.open { display:block; animation:drawerin .3s var(--ease-out) both; }
+    /* 申请状态横幅 */
+    .app-status-bar {
+      display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+      padding:16px 20px; border:2px solid var(--ink); border-radius:10px;
+      background:var(--paper-2); margin-bottom:20px;
+    }
+    .app-status-dot { width:14px; height:14px; border-radius:50%; flex-shrink:0; }
+    .app-status-dot.pending  { background:var(--tape); animation:recblink 1.6s infinite steps(1); }
+    .app-status-dot.approved { background:var(--green); }
+    .app-status-dot.rejected { background:var(--rec); }
+    /* 驳回后重新提交折叠区 */
+    .resubmit-area { display:none; margin-top:18px; }
+    .resubmit-area.open { display:block; animation:drawerin .35s var(--ease-out) both; }
+    /* 职位选择器 */
+    .job-select-wrap { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .job-select-wrap select {
+      flex:1 1 200px; border:2px solid var(--ink); border-radius:6px;
+      background:var(--paper-2); padding:9px 12px; font-size:15px; font-family:inherit;
+    }
+  </style>
 </head>
 <body>
 
   <div id="site-nav"></div>
 
   <main>
-    <!-- 未登录 / 加载中的占位 -->
+    <!-- 未登录 / 加载中占位 -->
     <div class="container" id="dash-guard" style="padding:90px 22px;text-align:center;">
-      <p class="hand" style="font-size:18px;">正在核对你的片场通行证……</p>
+      <p class="hand" style="font-size:18px;margin-bottom:20px;">正在核对你的片场通行证……</p>
     </div>
 
-    <!-- 登录后的主体(默认隐藏,JS 校验通过后显示) -->
+    <!-- 登录后主体 -->
     <div id="dash-main" style="display:none;">
       <header class="page-hero container" style="padding-bottom:20px;">
         <span class="scene-tag">SCENE 07 · 成员空间</span>
-        <h1 class="huazi stroke-white" style="font-size:clamp(30px,5vw,46px);">你好,<span class="rd" id="dash-name">成员</span> <span id="dash-role"></span></h1>
+        <h1 class="huazi stroke-white" style="font-size:clamp(28px,5vw,44px);">
+          你好，<span class="rd" id="dash-name">成员</span> <span id="dash-role"></span>
+        </h1>
         <p class="hand" id="dash-greet">—— 今天也要把脑洞拍出来。</p>
       </header>
 
       <div class="container">
+
+        <!-- ===== 我的申请状态 ===== -->
+        <section class="section" style="padding-top:20px;" id="my-app-section">
+          <div class="section-head">
+            <span class="scene-tag">MY STATUS · 申请状态</span>
+            <h2 class="huazi">我的<span class="hl">入队申请</span></h2>
+          </div>
+          <div id="my-app-content"><!-- 由 dashboard.js 渲染 --></div>
+        </section>
+
+        <!-- ===== 我的名片 ===== -->
+        <section class="section">
+          <div class="section-head">
+            <span class="scene-tag">PROFILE · 我的名片</span>
+            <h2 class="huazi">编辑<span class="rd">我的信息</span></h2>
+            <p class="hand">—— 修改昵称、职位和邮箱。职位由主理人或自己设定，展示在剧组名片墙。</p>
+          </div>
+          <div class="tape-card no-tape" id="my-profile-card"><!-- 由 dashboard.js 渲染 --></div>
+        </section>
+
         <!-- ===== 今日任务卡 ===== -->
-        <section class="section" style="padding-top:20px;">
+        <section class="section">
           <div class="section-head">
             <span class="scene-tag">TODAY · 今日交付</span>
             <h2 class="huazi" id="today-title">今天是<span class="hl">周几</span></h2>
-            <p class="hand">—— 按手册周流程,今天该做这些。不规定几点,当天完成即可。</p>
+            <p class="hand">—— 按手册周流程，今天该做这些。不规定几点，当天完成即可。</p>
           </div>
-          <div class="tape-card" id="today-card">
-            <!-- 由 dashboard.js 按星期渲染 -->
-          </div>
+          <div class="tape-card" id="today-card"></div>
         </section>
 
-        <!-- ===== 灵感池看板 ===== -->
+        <!-- ===== 剧组名片墙 ===== -->
         <section class="section">
+          <div class="section-head">
+            <span class="scene-tag">CREW · 剧组名片墙</span>
+            <h2 class="huazi">全组<span class="hl">成员名片</span></h2>
+            <p class="hand">—— 已通过审核的成员展示在这里，每人都可以查看和编辑自己的名片。</p>
+          </div>
+          <div class="crew-grid" id="crew-cards"><!-- 由 dashboard.js 渲染 --></div>
+        </section>
+
+        <!-- ===== 灵感池看板(成员+主理人可流转) ===== -->
+        <section class="section member-area">
           <div class="section-head">
             <span class="scene-tag">BOARD · 灵感池看板</span>
             <h2 class="huazi">灵感池<span class="rd">共享看板</span></h2>
-            <p class="hand">—— 手册 11.1 的看板搬到了线上。全组灵感都在这里,团队成员可拖动流转。</p>
+            <p class="hand">—— 手册 11.1 的看板搬到了线上。团队成员可流转状态。</p>
           </div>
-
-          <!-- 快速投灵感 -->
           <div class="tape-card no-tape" style="margin-bottom:24px;">
             <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
               <div class="field" style="flex:1 1 320px;margin-bottom:0;">
-                <label for="quick-idea">快速投一个灵感 <span class="tip">一句话设定,如果______会怎样</span></label>
+                <label for="quick-idea">快速投一个灵感 <span class="tip">一句话设定，如果______会怎样</span></label>
                 <input type="text" id="quick-idea" maxlength="80" placeholder="如果周一早上能被跳过……">
               </div>
               <button class="btn primary" id="quick-idea-btn">投进灵感池</button>
               <a class="btn ghost" href="tools.html#idea">填完整灵感卡 →</a>
             </div>
           </div>
-
           <div class="board-grid" id="board-grid">
             <div class="board-col" data-status="pool"><h3>灵感池 <span class="n" data-count-col="pool">0</span></h3><div class="col-body" data-body="pool"></div></div>
             <div class="board-col" data-status="review"><h3>待评估 <span class="n" data-count-col="review">0</span></h3><div class="col-body" data-body="review"></div></div>
@@ -68,32 +119,33 @@
           <p class="hand" id="board-role-tip" style="margin-top:16px;"></p>
         </section>
 
-        <!-- ===== 主理人:入队申请审核 ===== -->
+        <!-- ===== 主理人：入队申请审核 ===== -->
         <section class="section admin-only" style="display:none;">
           <div class="section-head">
             <span class="scene-tag">ADMIN · 入队申请</span>
             <h2 class="huazi">谁想<span class="hl">进组</span></h2>
-            <p class="hand">—— 只有你看得到。通过后请用对方留的联系方式主动联系。</p>
+            <p class="hand">—— 只有你看得到。通过后请用对方留的联系方式主动联系，审核结果会自动发邮件通知。</p>
           </div>
           <div id="applications-list"><div class="empty">加载中……</div></div>
         </section>
 
-        <!-- ===== 主理人:成员管理 ===== -->
+        <!-- ===== 主理人：成员管理 ===== -->
         <section class="section admin-only" style="display:none;">
           <div class="section-head">
             <span class="scene-tag">ADMIN · 成员管理</span>
             <h2 class="huazi">剧组<span class="rd">花名册</span></h2>
-            <p class="hand">—— 把通过面试的队友提升为「团队成员」,解锁看板流转权限。</p>
+            <p class="hand">—— 提升队友为团队成员；也可以为任何人设置职位身份。</p>
           </div>
           <div id="members-list"><div class="empty">加载中……</div></div>
         </section>
 
         <!-- 退出 -->
-        <div class="container" style="text-align:center;padding:20px 0 10px;">
+        <div style="text-align:center;padding:20px 0 30px;">
           <button class="btn ghost" id="dash-logout">退出登录</button>
         </div>
-      </div>
-    </div>
+
+      </div><!-- /container -->
+    </div><!-- /dash-main -->
   </main>
 
   <div id="site-footer"></div>

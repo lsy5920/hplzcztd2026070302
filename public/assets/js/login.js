@@ -84,9 +84,10 @@
     btn.disabled = true;
     btn.textContent = "注册中…";
     try {
+      const email = ($("#r-email") && $("#r-email").value.trim()) || "";
       const data = await HPLZ.api("/api/register", {
         method: "POST",
-        body: { username: username, display_name: display, password: pwd },
+        body: { username: username, display_name: display, password: pwd, email: email },
       });
       if (data.first_admin) {
         HPLZ.toast("注册成功!你是第一位用户,已自动成为主理人", "ok");
