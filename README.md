@@ -85,27 +85,41 @@ git push -u origin main
 
 ---
 
-### 第 3 步:创建 D1 数据库并初始化表结构
+### 第 3 步:创建 Supabase 项目并初始化数据库
 
-1. 回到 Cloudflare 控制台首页,左侧菜单点 **「Workers & Pages」→「D1」**。
-2. 点 **「Create database」**,名称填 `hplz-db`,点确认。
-3. 数据库创建后,点进去,找到 **「Console」(控制台)** 标签页。
-4. 打开本项目根目录的 `schema.sql` 文件,把**全部内容**复制进控制台文本框。
-5. 点 **「Execute」**,看到绿色 **「Success」** 即建表完成。
+1. 打开 [https://supabase.com](https://supabase.com),注册/登录账号。
+2. 点 **「New project」**,填写项目名称(如 `hplz`)、数据库密码(自己记好)，区域选离你最近的，点 **「Create new project」**，等待约 1 分钟初始化完成。
+3. 进入项目后，点左侧菜单 **「SQL Editor」**。
+4. 点 **「New query」**，把本项目根目录的 `schema_supabase.sql` 文件**全部内容**粘贴进去。
+5. 点 **「Run」**，看到绿色 **「Success. No rows returned」** 即建表完成。
 
-> **验证建表成功**:在控制台执行 `SELECT * FROM users;`,如果不报错(返回空结果)即说明表已创建。
+> **验证建表成功**：在 SQL Editor 执行 `SELECT * FROM users;`，不报错（返回空表格）即说明建表成功。左侧 **「Table Editor」** 也能看到 users / sessions / applications / ideas 四张表。
 
 ---
 
-### 第 4 步:把 D1 绑定到 Pages 项目
+### 第 4 步:把 Supabase 密钥配置到 Cloudflare Pages
 
-1. 回到 Pages 项目页面(**Workers & Pages → hplz-website**)。
-2. 点 **「Settings」→「Functions」**,找到 **「D1 database bindings」**。
-3. 点 **「Add binding」**:
-   - **Variable name(变量名)**:填 `DB`(必须大写,和代码里一致)
-   - **D1 database**:选择刚才创建的 `hplz-db`
-4. 点 **「Save」**。
-5. 回到 **「Deployments」** 标签页,点 **「Retry deployment」** 重新部署一次(让绑定生效)。
+**获取 Supabase 密钥：**
+
+1. 在 Supabase 项目页，点左侧 **「Settings」→「API」**。
+2. 记录以下两个值：
+   - **Project URL**（形如 `https://xxxx.supabase.co`）
+   - **service_role key**（在 `Project API Keys` 区域，点 **Reveal** 查看）
+
+> ⚠️ `service_role key` 具有完整数据库权限，只能用在服务端，绝对不要暴露在前端代码中。
+
+**在 Cloudflare Pages 配置环境变量：**
+
+1. 打开 Cloudflare Pages 项目页面 → **「Settings」→「Environment variables」**。
+2. 点 **「Add variable」**，分别添加以下两条（Production 和 Preview 都勾选）：
+
+| Variable name | Value | 类型 |
+|---------------|-------|------|
+| `SUPABASE_URL` | 你的 Project URL | 普通变量 |
+| `SUPABASE_KEY` | 你的 service_role key | **Secret（勾选 Encrypt）** |
+
+3. 点 **「Save」**。
+4. 回到 **「Deployments」** 标签页，点 **「Retry deployment」** 重新部署一次（让环境变量生效）。
 
 ---
 

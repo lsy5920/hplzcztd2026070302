@@ -1,7 +1,6 @@
 /* ============================================================
-   胡拍乱造 · 后端共享工具模块
-   文件名以下划线开头,不会生成路由,仅供其他接口文件导入
-   职责:统一响应格式、D1 检查、密码哈希、会话读写、输入校验
+   胡拍乱造 · 后端共享工具模块(Supabase 版)
+   用 fetch 直接调用 Supabase REST API，零依赖、零构建步骤
    ============================================================ */
 
 /* ---------- 统一 JSON 响应 ---------- */
@@ -15,192 +14,180 @@ export function json(data, status = 200, extraHeaders = {}) {
     },
   });
 }
-
-export function ok(data = {}) {
-  return json({ ok: true, ...data });
-}
-
+export function ok(data = {}) { return json({ ok: true, ...data }); }
 export function fail(message, status = 400) {
   return json({ ok: false, error: message }, status);
 }
 
-/* ---------- D1 绑定检查 ----------
-   未在 Cloudflare 控制台绑定 D1 时,给出清晰的中文指引,
-   避免出现看不懂的英文报错 */
-export function getDB(env) {
-  if (!env || !env.DB) return null;
-  return env.DB;
-}
-
+/* ---------- Supabase 客户端 ---------- */
 export const DB_MISSING_MSG =
-  "数据库尚未配置:请在 Cloudflare Pages 项目的「设置 → 绑定」中添加 D1 数据库绑定,变量名称填 DB(详见 README 部署教程第 4 步)";
+  "数据库尚未配置：请在 Cloudflare Pages「设置→环境变量」中添加" +
+  " SUPABASE_URL 和 SUPABASE_KEY（service_role key），详见 README";
 
-/* 数据库表未初始化时的提示 */
-export const TABLE_MISSING_MSG =
-  "数据库表尚未初始化:请在 D1 控制台执行仓库中的 schema.sql 建表语句(详见 README 部署教程第 3 步)";
-
-/* 判断是否为「表不存在」错误 */
-export function isNoTableError(err) {
-  return /no such table/i.test(String(err && err.message ? err.message : err));
+export function getDB(env) {
+  const url = env && env.SUPABASE_URL;
+  const key = env && env.SUPABASE_KEY;
+  if (!url || !key) return null;
+  return { url: url.replace(/\/$/, ""), key };
 }
 
-/* ---------- 自动建表(首次请求时运行,幂等) ----------
-   避免用户必须手动在 D1 控制台执行 schema.sql。
-   使用 IF NOT EXISTS，无论表是否存在都安全执行。 */
-export async function ensureTables(db) {
-  await db.batch([
-    db.prepare(`CREATE TABLE IF NOT EXISTS users (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      username      TEXT NOT NULL UNIQUE,
-      display_name  TEXT NOT NULL,
-      password_hash TEXT NOT NULL,
-      salt          TEXT NOT NULL,
-      role          TEXT NOT NULL DEFAULT 'visitor',
-      created_at    TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS sessions (
-      token      TEXT PRIMARY KEY,
-      user_id    INTEGER NOT NULL,
-      expires_at TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS applications (
-      id           INTEGER PRIMARY KEY AUTOINCREMENT,
-      name         TEXT NOT NULL,
-      contact      TEXT NOT NULL,
-      wish         TEXT NOT NULL DEFAULT '',
-      on_camera    TEXT NOT NULL DEFAULT '',
-      strengths    TEXT NOT NULL DEFAULT '',
-      weakness     TEXT NOT NULL DEFAULT '',
-      sunday_limit TEXT NOT NULL DEFAULT '',
-      goal         TEXT NOT NULL DEFAULT '',
-      message      TEXT NOT NULL DEFAULT '',
-      status       TEXT NOT NULL DEFAULT 'pending',
-      reviewed_by  INTEGER,
-      reviewed_at  TEXT,
-      created_at   TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    db.prepare(`CREATE TABLE IF NOT EXISTS ideas (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id     INTEGER NOT NULL,
-      title       TEXT NOT NULL,
-      observation TEXT NOT NULL DEFAULT '',
-      rule        TEXT NOT NULL DEFAULT '',
-      escalation  TEXT NOT NULL DEFAULT '',
-      ending      TEXT NOT NULL DEFAULT '',
-      resources   TEXT NOT NULL DEFAULT '',
-      risk        TEXT NOT NULL DEFAULT '',
-      score_total INTEGER NOT NULL DEFAULT 0,
-      status      TEXT NOT NULL DEFAULT 'pool',
-      created_at  TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-  ]);
+/* 内部 HTTP 请求封装 */
+async function sbReq(db, method, table, body, params, extraHeaders) {
+  const url = new URL(db.url + "/rest/v1/" + table);
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
+    });
+  }
+  const headers = {
+    apikey: db.key,
+    Authorization: "Bearer " + db.key,
+    "Content-Type": "application/json",
+    ...extraHeaders,
+  };
+  if (method === "POST" || method === "PATCH") {
+    headers["Prefer"] = "return=representation";
+  }
+  const res = await fetch(url.toString(), {
+    method,
+    headers,
+    body: body != null ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    let msg = "HTTP " + res.status;
+    try {
+      const e = await res.json();
+      msg = e.message || e.hint || e.details || msg;
+    } catch (_) {}
+    throw new Error(msg);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+/* 高级查询封装(返回第一行 / 多行 / 执行写操作) */
+export const sb = {
+  /* 查单行 */
+  async first(db, table, filters) {
+    const params = buildFilters(filters);
+    params.limit = "1";
+    const rows = await sbReq(db, "GET", table, null, params);
+    return (rows && rows[0]) || null;
+  },
+  /* 查多行 */
+  async all(db, table, filters, order) {
+    const params = buildFilters(filters);
+    if (order) params.order = order;
+    return await sbReq(db, "GET", table, null, params) || [];
+  },
+  /* 计数 */
+  async count(db, table, filters) {
+    const params = buildFilters(filters);
+    params.select = "id";
+    params.limit = "1000";
+    const rows = await sbReq(db, "GET", table, null, params,
+      { Prefer: "count=exact" }) || [];
+    return rows.length;
+  },
+  /* 插入一行，返回插入后的行 */
+  async insert(db, table, data) {
+    const rows = await sbReq(db, "POST", table, data);
+    return (rows && rows[0]) || null;
+  },
+  /* 更新匹配行 */
+  async update(db, table, filters, data) {
+    const params = buildFilters(filters);
+    await sbReq(db, "PATCH", table, data, params);
+  },
+  /* 删除匹配行 */
+  async delete(db, table, filters) {
+    const params = buildFilters(filters);
+    await sbReq(db, "DELETE", table, null, params);
+  },
+};
+
+/* 把 { username: 'abc' } 转成 Supabase 过滤参数 { username: 'eq.abc' } */
+function buildFilters(filters) {
+  if (!filters) return {};
+  const p = {};
+  Object.entries(filters).forEach(([k, v]) => {
+    if (v === null) { p[k] = "is.null"; }
+    else if (typeof v === "object" && v.op) {
+      p[k] = v.op + "." + v.val;
+    } else {
+      p[k] = "eq." + v;
+    }
+  });
+  return p;
 }
 
 /* ---------- 十六进制编解码 ---------- */
-export function bufToHex(buf) {
+function bufToHex(buf) {
   return Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
-
-export function hexToBuf(hex) {
+function hexToBuf(hex) {
   const arr = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < arr.length; i++) {
-    arr[i] = parseInt(hex.substr(i * 2, 2), 16);
-  }
+  for (let i = 0; i < arr.length; i++) arr[i] = parseInt(hex.substr(i * 2, 2), 16);
   return arr.buffer;
 }
 
-/* ---------- 密码哈希(PBKDF2-SHA256,10 万次迭代) ---------- */
+/* ---------- 密码哈希 PBKDF2-SHA256，10 万次迭代 ---------- */
 export async function hashPassword(password, saltHex) {
   const enc = new TextEncoder();
   const salt = saltHex ? hexToBuf(saltHex) : crypto.getRandomValues(new Uint8Array(16)).buffer;
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    enc.encode(password),
-    "PBKDF2",
-    false,
-    ["deriveBits"]
-  );
+  const km = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveBits"]);
   const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
-    keyMaterial,
-    256
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }, km, 256
   );
   return { hash: bufToHex(bits), salt: bufToHex(salt) };
 }
 
-/* 恒定时间比较,避免时序攻击 */
+/* 恒定时间比较 */
 export function safeEqual(a, b) {
   if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
 }
 
 /* ---------- 会话管理 ---------- */
-const SESSION_DAYS = 30; // 会话有效期(天)
+const SESSION_DAYS = 30;
 
 export function newToken() {
   return crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
 }
 
-export function sessionCookie(token, maxAgeSeconds) {
-  const base = [
-    "hplz_session=" + token,
-    "Path=/",
-    "HttpOnly",
-    "Secure",
-    "SameSite=Lax",
-    "Max-Age=" + maxAgeSeconds,
-  ];
-  return base.join("; ");
+export function sessionCookie(token, maxAge) {
+  return ["hplz_session=" + token, "Path=/", "HttpOnly", "Secure",
+    "SameSite=Lax", "Max-Age=" + maxAge].join("; ");
 }
 
 export async function createSession(db, userId) {
   const token = newToken();
-  const expires = new Date(Date.now() + SESSION_DAYS * 86400000)
-    .toISOString()
-    .replace("T", " ")
-    .slice(0, 19);
-  await db
-    .prepare("INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)")
-    .bind(token, userId, expires)
-    .run();
+  const expires = new Date(Date.now() + SESSION_DAYS * 86400000).toISOString();
+  await sb.insert(db, "sessions", { token, user_id: userId, expires_at: expires });
   return { token, maxAge: SESSION_DAYS * 86400 };
 }
 
 export function readSessionToken(request) {
-  const cookie = request.headers.get("Cookie") || "";
-  const m = cookie.match(/(?:^|;\s*)hplz_session=([A-Za-z0-9]+)/);
+  const m = (request.headers.get("Cookie") || "").match(/(?:^|;\s*)hplz_session=([A-Za-z0-9]+)/);
   return m ? m[1] : null;
 }
 
-/* 根据请求取当前登录用户;未登录返回 null */
 export async function getUser(request, db) {
   const token = readSessionToken(request);
   if (!token) return null;
-  const row = await db
-    .prepare(
-      "SELECT u.id, u.username, u.display_name, u.role, s.token, s.expires_at " +
-        "FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ?"
-    )
-    .bind(token)
-    .first();
-  if (!row) return null;
-  // 过期会话:顺手清除
-  if (new Date(row.expires_at.replace(" ", "T") + "Z").getTime() < Date.now()) {
-    await db.prepare("DELETE FROM sessions WHERE token = ?").bind(token).run();
+  const session = await sb.first(db, "sessions", { token });
+  if (!session) return null;
+  if (new Date(session.expires_at).getTime() < Date.now()) {
+    await sb.delete(db, "sessions", { token });
     return null;
   }
-  return {
-    id: row.id,
-    username: row.username,
-    display_name: row.display_name,
-    role: row.role,
-    token: row.token,
-  };
+  const user = await sb.first(db, "users", { id: session.user_id });
+  if (!user) return null;
+  return { id: user.id, username: user.username, display_name: user.display_name, role: user.role };
 }
 
 /* ---------- 输入校验 ---------- */
@@ -208,20 +195,9 @@ export function trimStr(v, maxLen) {
   const s = String(v == null ? "" : v).trim();
   return maxLen ? s.slice(0, maxLen) : s;
 }
+export function isValidUsername(n) { return /^[A-Za-z0-9_]{3,20}$/.test(n); }
+export function isValidPassword(p) { return typeof p === "string" && p.length >= 6 && p.length <= 64; }
 
-export function isValidUsername(name) {
-  return /^[A-Za-z0-9_]{3,20}$/.test(name);
-}
-
-export function isValidPassword(pwd) {
-  return typeof pwd === "string" && pwd.length >= 6 && pwd.length <= 64;
-}
-
-/* 读取 JSON 请求体(格式错误时返回 null) */
-export async function readBody(request) {
-  try {
-    return await request.json();
-  } catch (e) {
-    return null;
-  }
+export async function readBody(req) {
+  try { return await req.json(); } catch (_) { return null; }
 }
