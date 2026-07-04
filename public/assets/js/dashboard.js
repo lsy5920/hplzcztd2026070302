@@ -42,6 +42,18 @@
       return;
     }
     currentUser = me;
+
+    /* 访客只能访问角色卡页面，未通过审核前不进入成员空间 */
+    if (me.role === "visitor") {
+      var g = $("#dash-guard");
+      if (g) g.innerHTML =
+        '<div style="padding:80px 22px;text-align:center;">' +
+        '<p class="hand" style="font-size:18px;margin-bottom:10px;">你的账号还没有通过角色卡审核。</p>' +
+        '<p style="color:var(--ink-soft);margin-bottom:24px;">通过审核后身份升级为成员，即可进入成员空间。</p>' +
+        '<a class="btn primary" href="join.html">前往角色卡页面查看状态</a>';
+      return;
+    }
+
     $("#dash-guard").style.display = "none";
     $("#dash-main").style.display  = "block";
     const dn = $("#dash-name"); if (dn) dn.textContent = me.display_name;
@@ -465,23 +477,31 @@
       var data = await HPLZ.api("/api/members");
       var members = data.members || [];
       if (!members.length) { wrap.innerHTML = '<div class="empty">还没有注册用户</div>'; return; }
-      var jo = [""].concat(JOB_OPTIONS).map(function (o) { return '<option value="' + HPLZ.esc(o) + '">' + (o || "-- 选择职位 --") + "</option>"; }).join("");
       wrap.innerHTML = members.map(function (m) {
         var isMe = m.id === currentUser.id;
+        /* 在循环体内生成options，才能对当前职位加selected */
+        var mJo = [""].concat(JOB_OPTIONS).map(function (o) {
+          var sel = (o === (m.job_title || "")) ? " selected" : "";
+          return '<option value="' + HPLZ.esc(o) + '"' + sel + '>' + (o || "-- 选择职位 --") + "</option>";
+        }).join("");
         return '<div class="list-row"><div class="grow">' +
           '<h4>' + HPLZ.esc(m.display_name) + ' <span class="role-badge ' + m.role + '">' + (ROLE_NAMES[m.role] || m.role) + "</span>" +
           (isMe ? ' <span class="role-badge visitor" style="background:var(--tape);">我</span>' : "") + "</h4>" +
           '<p class="sub">@' + HPLZ.esc(m.username) + " · 职位：" + HPLZ.esc(m.job_title || "未设置") + "</p></div>" +
           '<div class="ops" style="flex-direction:column;gap:8px;">' +
             '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-              '<select class="js-sel" data-uid="' + m.id + '" style="border:1.5px solid var(--ink);border-radius:6px;padding:6px 10px;font-family:inherit;font-size:13px;">' + jo + "</select>" +
+              '<select class="js-sel" data-uid="' + m.id + '" style="border:1.5px solid var(--ink);border-radius:6px;padding:6px 10px;font-family:inherit;font-size:13px;">' + mJo + "</select>" +
               '<button class="btn sm yellow js-set" data-uid="' + m.id + '">设职位</button>' +
             "</div>" +
             (!isMe && m.role !== "admin"
               ? (m.role === "visitor"
                   ? '<button class="btn sm primary role-up" data-uid="' + m.id + '">提升为成员</button>'
                   : '<button class="btn sm ghost role-dn" data-uid="' + m.id + '">调回访客</button>')
-              : "") + "</div></div>";
+              : "") +
+            (isMe || true  /* 主理人可删除任何非自身账号 */
+              ? (!isMe ? '<button class="btn sm ghost del-account" data-uid="' + m.id + '" data-name="' + HPLZ.esc(m.display_name) + '" style="color:var(--rec);border-color:var(--rec);">删除账号</button>' : "")
+              : "") +
+          "</div></div>";
       }).join("");
       wrap.querySelectorAll(".js-set").forEach(function (btn) {
         btn.addEventListener("click", async function () {
@@ -499,6 +519,19 @@
           try { var res = await HPLZ.api("/api/members/role", { method: "POST", body: { id: parseInt(btn.dataset.uid, 10), action: "role", role: btn.classList.contains("role-up") ? "member" : "visitor" } }); HPLZ.toast(res.message, "ok"); loadMembers(); loadCrewCards(); }
           catch (err) { HPLZ.toast(err.message, "err"); }
           btn.disabled = false;
+        });
+      });
+      /* 删除账号 */
+      wrap.querySelectorAll(".del-account").forEach(function (btn) {
+        btn.addEventListener("click", async function () {
+          var uid  = parseInt(btn.dataset.uid, 10);
+          var name = btn.dataset.name || "该用户";
+          if (!confirm("确认彻底删除「" + name + "」的账号？这将同时删除其所有数据且不可撤销。")) return;
+          btn.disabled = true;
+          try {
+            var res = await HPLZ.api("/api/users/" + uid, { method: "DELETE" });
+            HPLZ.toast(res.message, "ok"); loadMembers(); loadCrewCards();
+          } catch (err) { HPLZ.toast(err.message, "err"); btn.disabled = false; }
         });
       });
     } catch (err) { wrap.innerHTML = '<div class="empty">' + HPLZ.esc(err.message) + "</div>"; }
