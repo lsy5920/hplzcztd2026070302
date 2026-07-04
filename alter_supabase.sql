@@ -11,3 +11,6 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS job_title TEXT NOT NULL DEFAULT '';
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS user_id     BIGINT REFERENCES users(id) ON DELETE SET NULL;
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS reject_note TEXT NOT NULL DEFAULT '';
 CREATE INDEX IF NOT EXISTS idx_applications_user ON applications(user_id);
+
+-- users 表：新增出生年份（整数，如 1998）
+ALTER TABLE users ADD COLUMN IF NOT EXISTS birth_year INTEGER DEFAULT NULL;

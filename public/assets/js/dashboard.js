@@ -114,7 +114,7 @@
           '<div class="crew-face" style="background:var(--rec);width:52px;height:52px;font-size:22px;">' + HPLZ.esc((user.display_name || "").charAt(0).toUpperCase()) + "</div>" +
           '<div style="flex:1;min-width:0;"><strong style="font-size:17px;">' + HPLZ.esc(user.display_name) + "</strong>" +
             '<p class="mono" style="font-size:11px;color:var(--rec-deep);margin:3px 0;">' + HPLZ.esc(user.job_title || "(职位未设置)") + "</p>" +
-            '<p style="font-size:13px;color:var(--ink-faint);">' + (user.email ? "📧 " + HPLZ.esc(user.email) : "⚠️ 邮箱未填写") + "</p></div>" +
+            '<p style="font-size:13px;color:var(--ink-faint);">' + (user.email ? "📧 " + HPLZ.esc(user.email) : "⚠️ 邮箱未填写") + "</p>" + (user.birth_year ? '<p style="font-size:12px;color:var(--ink-faint);">🎂 ' + user.birth_year + ' 年生</p>' : "") + "</div>" +
           '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
             '<button class="btn sm yellow" id="ce-toggle">编辑角色卡</button>' +
             (latest && latest.status === "rejected" ? '<button class="btn sm primary" id="rs-toggle">修改后重新提交</button>' : "") +
@@ -123,9 +123,13 @@
           '<h4 style="font-weight:900;margin:0 0 14px;">基本信息</h4>' +
           '<div class="field"><label>昵称</label><input type="text" id="ce-dname" maxlength="20" value="' + HPLZ.esc(user.display_name) + '"></div>' +
           '<div class="field"><label>邮箱 <span class="tip">接收通知用</span></label><input type="email" id="ce-email" maxlength="120" value="' + HPLZ.esc(user.email || "") + '"></div>' +
-          '<div class="field"><label>职位身份</label>' +
-            '<div class="job-select-wrap"><select id="ce-job"><option value="">请选择…</option>' + jobOpts + '<option value="__custom__">自定义…</option></select>' +
-            '<input type="text" id="ce-jobc" maxlength="40" placeholder="自定义职位" style="flex:1;display:none;border:2px solid var(--ink);border-radius:6px;padding:9px 12px;font-family:inherit;font-size:15px;"></div></div>' +
+          '<div class="field"><label for="ce-birth">出生年份 <span class="tip">如 1998</span></label>' +
+            '<input type="number" id="ce-birth" min="1940" max="2010" value="' + (user.birth_year || "") + '" placeholder="例：1998"></div>' +
+          (currentUser && currentUser.role === "admin"
+            ? '<div class="field"><label>职位身份 <span class="tip">仅主理人可设</span></label>' +
+              '<div class="job-select-wrap"><select id="ce-job"><option value="">请选择…</option>' + jobOpts + '<option value="__custom__">自定义…</option></select>' +
+              '<input type="text" id="ce-jobc" maxlength="40" placeholder="自定义职位" style="flex:1;display:none;border:2px solid var(--ink);border-radius:6px;padding:9px 12px;font-family:inherit;font-size:15px;"></div></div>'
+            : '<p class="hand" style="font-size:13px;margin:4px 0 10px;">职位由主理人统一分配，如需更改请联系主理人。</p>') +
           editCard +
           '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">' +
             '<button class="btn sm primary" id="ce-save">保存角色卡</button>' +
@@ -151,10 +155,14 @@
         sv.disabled = true; sv.textContent = "保存中…";
         try {
           var jv = (cj && cj.value === "__custom__") ? (cjc ? cjc.value.trim() : "") : (cj ? cj.value : "");
-          var saves = [HPLZ.api("/api/profile", { method: "PATCH", body: {
+          var birthVal = ($("#ce-birth") && $("#ce-birth").value || "").trim();
+          var profileBody = {
             display_name: ($("#ce-dname") && $("#ce-dname").value || "").trim(),
-            email: ($("#ce-email") && $("#ce-email").value || "").trim(), job_title: jv,
-          }})];
+            email: ($("#ce-email") && $("#ce-email").value || "").trim(),
+          };
+          if (birthVal) profileBody.birth_year = parseInt(birthVal, 10);
+          if (currentUser && currentUser.role === "admin" && jv !== undefined) profileBody.job_title = jv;
+          var saves = [HPLZ.api("/api/profile", { method: "PATCH", body: profileBody })];
           if (latest && latest.status !== "pending") {
             saves.push(HPLZ.api("/api/applications/mine", { method: "PATCH", body: {
               name: ($("#ce-cname") && $("#ce-cname").value || "").trim(),

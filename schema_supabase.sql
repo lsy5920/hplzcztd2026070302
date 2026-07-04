@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
   role          TEXT NOT NULL DEFAULT 'visitor',
   email         TEXT NOT NULL DEFAULT '',
   job_title     TEXT NOT NULL DEFAULT '',
+  birth_year    INTEGER DEFAULT NULL,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

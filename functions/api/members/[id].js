@@ -55,8 +55,12 @@ export async function onRequestPatch({ request, env, params }) {
 
     const updates = {};
     if (body.display_name !== undefined) updates.display_name = trimStr(body.display_name, 20);
-    if (body.job_title !== undefined)    updates.job_title    = trimStr(body.job_title, 40);
-    if (body.email !== undefined && isMe) updates.email = trimStr(body.email, 120); // 邮箱只能本人改
+    /* 职位只有主理人可以修改，本人也无权自行设置 */
+    if (body.job_title !== undefined) {
+      if (!isAdmin) return fail("职位身份只有主理人可以设置", 403);
+      updates.job_title = trimStr(body.job_title, 40);
+    }
+    if (body.email !== undefined && isMe) updates.email = trimStr(body.email, 120);
     if (!Object.keys(updates).length)   return fail("没有需要更新的内容");
 
     await sb.update(db, "users", { id }, updates);
